@@ -23,6 +23,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   flame_forge2d: ^0.19.0+4
   confetti: ^0.7.0
+  # cloud_firestore: ^4.13.6
+   #firebase_core: ^2.24.2
 
 dev_dependencies:
   flutter_test:
@@ -51,3 +53,11 @@ flutter:
     - lib/assets/earthAndSpace.jpg
     - lib/assets/chemistry.jpg
     - lib/assets/BeautifulSpace.jpg
+    - lib/assets/statesofmatter.jpg
+    - lib/assets/earthScience.png
+    - lib/assets/plantScience.jpg
+    - lib/assets/videos/theWaterCycle.mp4
+    - lib/assets/videos/planetSolarSystem.mp4
+    - lib/assets/videos/photosynthesis.mp4
+    - lib/assets/videos/statesOfMatter.mp4
+    - lib/assets/videos/foodChain.mp4
