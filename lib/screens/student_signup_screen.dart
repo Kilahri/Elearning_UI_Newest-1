@@ -19,7 +19,8 @@ class StudentSignupScreen extends StatefulWidget {
 class _StudentSignupScreenState extends State<StudentSignupScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _studentIdController = TextEditingController();
-  final TextEditingController _parentContactController = TextEditingController();
+  final TextEditingController _parentContactController =
+      TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -59,7 +60,10 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
       await prefs.setString("studentId", _studentIdController.text.trim());
     }
     if (_parentContactController.text.isNotEmpty) {
-      await prefs.setString("parentContact", _parentContactController.text.trim());
+      await prefs.setString(
+        "parentContact",
+        _parentContactController.text.trim(),
+      );
     }
 
     if (!mounted) return;
@@ -67,7 +71,11 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => RoleNavigation(role: selectedRole),
+        builder:
+            (context) => RoleNavigation(
+              role: selectedRole,
+              username: _usernameController.text.trim(),
+            ),
       ),
     );
   }
@@ -93,9 +101,7 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
         prefixIcon: Icon(icon, color: kAccentColor),
         filled: true,
         fillColor: kPrimaryColor.withOpacity(0.1),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
       ),
     );
   }
@@ -111,20 +117,14 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
     return DropdownButtonFormField<String>(
       value: value,
       onChanged: onChanged,
-      items: items
-          .map((e) => DropdownMenuItem(
-                value: e,
-                child: Text(e),
-              ))
-          .toList(),
+      items:
+          items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: kAccentColor),
         filled: true,
         fillColor: kPrimaryColor.withOpacity(0.1),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
       ),
     );
   }

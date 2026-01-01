@@ -60,14 +60,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
         leading: Icon(icon, color: _primaryAccentColor, size: 24),
         title: Text(
           title,
-          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        subtitle: subtitle != null
-            ? Text(
-                subtitle,
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-              )
-            : null,
+        subtitle:
+            subtitle != null
+                ? Text(
+                  subtitle,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                )
+                : null,
         trailing: const Icon(
           Icons.arrow_forward_ios,
           size: 16,
@@ -95,14 +100,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
         secondary: Icon(icon, color: _primaryAccentColor, size: 24),
         title: Text(
           title,
-          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        subtitle: subtitle != null
-            ? Text(
-                subtitle,
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
-              )
-            : null,
+        subtitle:
+            subtitle != null
+                ? Text(
+                  subtitle,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                )
+                : null,
         value: value,
         onChanged: onChanged,
         activeColor: _primaryAccentColor,
@@ -136,7 +146,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // ⭐ Functionally links to the AnalyticsScreen
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AnalyticsScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const AnalyticsScreen(),
+                ),
               );
             },
           ),

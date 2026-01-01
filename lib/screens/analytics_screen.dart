@@ -8,7 +8,13 @@ class BadgeData {
   final Color color;
   final String category;
 
-  const BadgeData(this.title, this.level, this.status, this.color, this.category);
+  const BadgeData(
+    this.title,
+    this.level,
+    this.status,
+    this.color,
+    this.category,
+  );
 }
 
 // Placeholder Data for the screen
@@ -27,9 +33,24 @@ const String bestQuiz = "98% on 'The Water Cycle' Quiz";
 
 final List<Map<String, dynamic>> topicMasteryData = [
   {"topic": "Biology", "score": 92, "level": "Expert", "color": Colors.green},
-  {"topic": "Chemistry", "score": 78, "level": "Proficient", "color": Colors.blue},
-  {"topic": "Physics", "score": 65, "level": "Developing", "color": Colors.orange},
-  {"topic": "Earth Science", "score": 88, "level": "Expert", "color": Colors.cyan},
+  {
+    "topic": "Chemistry",
+    "score": 78,
+    "level": "Proficient",
+    "color": Colors.blue,
+  },
+  {
+    "topic": "Physics",
+    "score": 65,
+    "level": "Developing",
+    "color": Colors.orange,
+  },
+  {
+    "topic": "Earth Science",
+    "score": 88,
+    "level": "Expert",
+    "color": Colors.cyan,
+  },
 ];
 
 final List<String> improvementAreas = [
@@ -40,12 +61,30 @@ final List<String> improvementAreas = [
 
 final List<BadgeData> allBadges = [
   // Puzzle
-  const BadgeData("Logic Master", "Star", "Completed", Colors.deepPurple, "Puzzle"),
-  const BadgeData("Sequence Solver", "Senior", "75%", Colors.lightBlue, "Puzzle"),
+  const BadgeData(
+    "Logic Master",
+    "Star",
+    "Completed",
+    Colors.deepPurple,
+    "Puzzle",
+  ),
+  const BadgeData(
+    "Sequence Solver",
+    "Senior",
+    "75%",
+    Colors.lightBlue,
+    "Puzzle",
+  ),
   const BadgeData("Element Master", "Junior", "0%", Colors.indigo, "Puzzle"),
   // Adventure
   const BadgeData("Explorer", "Senior", "Completed", Colors.teal, "Adventure"),
-  const BadgeData("Discovery Scout", "Junior", "40%", Colors.green, "Adventure"),
+  const BadgeData(
+    "Discovery Scout",
+    "Junior",
+    "40%",
+    Colors.green,
+    "Adventure",
+  ),
   const BadgeData("Map Reader", "None", "0%", Colors.grey, "Adventure"),
   // Trivia
   const BadgeData("Quick Thinker", "Star", "Completed", Colors.green, "Trivia"),
@@ -60,7 +99,7 @@ final List<BadgeData> allBadges = [
 // Group badges by category for the new layout
 final Map<String, List<BadgeData>> groupedBadges = {
   for (var category in allBadges.map((e) => e.category).toSet())
-    category: allBadges.where((b) => b.category == category).toList()
+    category: allBadges.where((b) => b.category == category).toList(),
 };
 
 // --- Main Screen Widget ---
@@ -75,8 +114,10 @@ class AnalyticsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: cardColor,
         elevation: 4,
-        title: const Text("Student Progress & Badges",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Student Progress & Badges",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
@@ -89,7 +130,11 @@ class AnalyticsScreen extends StatelessWidget {
             // =========================================================
             // 1. Overall Mastery & Summary
             // =========================================================
-            _buildSectionTitle(context, "Overall Mastery & Summary", accentColor),
+            _buildSectionTitle(
+              context,
+              "Overall Mastery & Summary",
+              accentColor,
+            ),
             const SizedBox(height: 12),
             _buildOverallSummaryCard(
               overallProgress: overallProgress,
@@ -104,13 +149,22 @@ class AnalyticsScreen extends StatelessWidget {
             // =========================================================
             // 2. Detailed Performance Metrics 📊
             // =========================================================
-            _buildSectionTitle(context, "Detailed Performance Metrics 📊", accentColor),
+            _buildSectionTitle(
+              context,
+              "Detailed Performance Metrics 📊",
+              accentColor,
+            ),
             const SizedBox(height: 12),
             // A. Topic Mastery
             _buildTopicMastery(topicMasteryData, cardColor),
             const SizedBox(height: 20),
             // B. Assessment Analytics
-            _buildAssessmentAnalytics(cardColor, averageQuizScore, bestQuiz, improvementAreas),
+            _buildAssessmentAnalytics(
+              cardColor,
+              averageQuizScore,
+              bestQuiz,
+              improvementAreas,
+            ),
             const SizedBox(height: 20),
             // C. Learning Engagement
             _buildEngagementMetrics(cardColor),
@@ -119,7 +173,11 @@ class AnalyticsScreen extends StatelessWidget {
             // =========================================================
             // 3. Specific Achievements (Badges) 🏆
             // =========================================================
-            _buildSectionTitle(context, "Specific Achievements (Badges) 🏆", accentColor),
+            _buildSectionTitle(
+              context,
+              "Specific Achievements (Badges) 🏆",
+              accentColor,
+            ),
             const SizedBox(height: 12),
             // Renders all badge categories vertically
             _buildBadgeCategories(groupedBadges, cardColor),
@@ -217,7 +275,10 @@ class AnalyticsScreen extends StatelessWidget {
                 Text(
                   masteryLevel,
                   style: const TextStyle(
-                      color: Colors.yellow, fontSize: 18, fontWeight: FontWeight.w600),
+                    color: Colors.yellow,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 Text(
                   "Total Progress: ${lessonsCompleted}/${totalLessons} lessons",
@@ -257,7 +318,14 @@ class AnalyticsScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Topic Mastery", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+        const Text(
+          "Topic Mastery",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.all(16),
@@ -266,35 +334,41 @@ class AnalyticsScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
-            children: data.map((item) {
-              Color barColor = item['color'] as Color;
-              double score = item['score'] / 100;
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6.0),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 100,
-                      child: Text(
-                        "${item['topic']}:",
-                        style: const TextStyle(color: Colors.white70, fontSize: 14),
-                      ),
+            children:
+                data.map((item) {
+                  Color barColor = item['color'] as Color;
+                  double score = item['score'] / 100;
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6.0),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          child: Text(
+                            "${item['topic']}:",
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: LinearProgressIndicator(
+                            value: score,
+                            backgroundColor: Colors.white12,
+                            valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "${item['score']}% (${item['level']})",
+                          style: TextStyle(color: barColor, fontSize: 14),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: LinearProgressIndicator(
-                        value: score,
-                        backgroundColor: Colors.white12,
-                        valueColor: AlwaysStoppedAnimation<Color>(barColor),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text("${item['score']}% (${item['level']})",
-                        style: TextStyle(color: barColor, fontSize: 14)),
-                  ],
-                ),
-              );
-            }).toList(),
+                  );
+                }).toList(),
           ),
         ),
       ],
@@ -302,14 +376,22 @@ class AnalyticsScreen extends StatelessWidget {
   }
 
   Widget _buildAssessmentAnalytics(
-      Color cardColor,
-      double averageScore,
-      String bestQuiz,
-      List<String> improvementAreas) {
+    Color cardColor,
+    double averageScore,
+    String bestQuiz,
+    List<String> improvementAreas,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Assessment Analytics", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+        const Text(
+          "Assessment Analytics",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.all(16),
@@ -320,28 +402,50 @@ class AnalyticsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildMetricRow("Average Quiz Score:", "${averageScore.toInt()}%", Colors.yellow),
+              _buildMetricRow(
+                "Average Quiz Score:",
+                "${averageScore.toInt()}%",
+                Colors.yellow,
+              ),
               _buildMetricRow("Best Performance:", bestQuiz, Colors.lightGreen),
               const SizedBox(height: 10),
-              const Text("Areas for Improvement (Top 3):",
-                  style: TextStyle(color: Colors.redAccent, fontSize: 15, fontWeight: FontWeight.w500)),
+              const Text(
+                "Areas for Improvement (Top 3):",
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               const SizedBox(height: 4),
-              ...improvementAreas.map((area) => Padding(
-                    padding: const EdgeInsets.only(left: 8.0, top: 2),
-                    child: Text("• $area", style: const TextStyle(color: Colors.white70, fontSize: 14)),
-                  )),
+              ...improvementAreas.map(
+                (area) => Padding(
+                  padding: const EdgeInsets.only(left: 8.0, top: 2),
+                  child: Text(
+                    "• $area",
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
       ],
     );
   }
-  
+
   Widget _buildEngagementMetrics(Color cardColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Learning Engagement", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600)),
+        const Text(
+          "Learning Engagement",
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.all(16),
@@ -351,7 +455,11 @@ class AnalyticsScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildMetricRow("Lessons Completed:", "${lessonsCompleted}/${totalLessons}", Colors.lightBlue),
+              _buildMetricRow(
+                "Lessons Completed:",
+                "${lessonsCompleted}/${totalLessons}",
+                Colors.lightBlue,
+              ),
               _buildMetricRow("Videos Watched:", "22 hours", Colors.pinkAccent),
               _buildMetricRow("Practice Questions:", "500+", Colors.orange),
             ],
@@ -367,27 +475,41 @@ class AnalyticsScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: const TextStyle(color: Colors.white70, fontSize: 15)),
-          Text(value, style: TextStyle(color: color, fontSize: 15, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: const TextStyle(color: Colors.white70, fontSize: 15),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
   }
 
   // Refactored badge section to display all categories vertically
-  Widget _buildBadgeCategories(Map<String, List<BadgeData>> groupedBadges, Color cardColor) {
+  Widget _buildBadgeCategories(
+    Map<String, List<BadgeData>> groupedBadges,
+    Color cardColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: groupedBadges.entries.map((entry) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 20.0),
-          child: BadgeCategory(
-            categoryName: entry.key,
-            badges: entry.value,
-            cardColor: cardColor,
-          ),
-        );
-      }).toList(),
+      children:
+          groupedBadges.entries.map((entry) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: BadgeCategory(
+                categoryName: entry.key,
+                badges: entry.value,
+                cardColor: cardColor,
+              ),
+            );
+          }).toList(),
     );
   }
 }
@@ -427,7 +549,9 @@ class BadgeCategory extends StatelessWidget {
     const double itemHeight = 180.0;
     final itemWidth = (screenWidth - 32) / crossAxisCount - 8;
     final aspectRatio = itemWidth / itemHeight;
-    final gridHeight = (badges.length / crossAxisCount).ceil() * (itemHeight + 16); // height * rows + mainAxisSpacing * rows
+    final gridHeight =
+        (badges.length / crossAxisCount).ceil() *
+        (itemHeight + 16); // height * rows + mainAxisSpacing * rows
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -446,7 +570,8 @@ class BadgeCategory extends StatelessWidget {
         SizedBox(
           height: gridHeight, // Use calculated height instead of Expanded
           child: GridView.builder(
-            physics: const NeverScrollableScrollPhysics(), // Disable internal scrolling
+            physics:
+                const NeverScrollableScrollPhysics(), // Disable internal scrolling
             itemCount: badges.length,
             padding: EdgeInsets.zero,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -472,37 +597,35 @@ class BadgeCard extends StatelessWidget {
   final BadgeData badge;
   final IconData levelIcon;
 
-  const BadgeCard({
-    super.key,
-    required this.badge,
-    required this.levelIcon,
-  });
+  const BadgeCard({super.key, required this.badge, required this.levelIcon});
 
   @override
   Widget build(BuildContext context) {
     bool isCompleted = badge.status == "Completed";
-    double progress = (double.tryParse(badge.status.replaceAll('%', '')) ?? 0.0) / 100;
+    double progress =
+        (double.tryParse(badge.status.replaceAll('%', '')) ?? 0.0) / 100;
     bool isNotReached = progress == 0.0 && !isCompleted;
 
     return Container(
       decoration: BoxDecoration(
         color: cardColor, // Dark card background
         borderRadius: BorderRadius.circular(16),
-        boxShadow: isCompleted
-            ? [
-                BoxShadow(
-                  color: badge.color.withOpacity(0.4),
-                  blurRadius: 10,
-                  spreadRadius: 1,
-                ),
-              ]
-            : [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
-                ),
-              ],
+        boxShadow:
+            isCompleted
+                ? [
+                  BoxShadow(
+                    color: badge.color.withOpacity(0.4),
+                    blurRadius: 10,
+                    spreadRadius: 1,
+                  ),
+                ]
+                : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
         border: Border.all(
           color: isCompleted ? badge.color : Colors.white10,
           width: isCompleted ? 2.5 : 1.0,
@@ -549,7 +672,10 @@ class BadgeCard extends StatelessWidget {
             Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black45,
                     borderRadius: BorderRadius.circular(12),
@@ -561,11 +687,19 @@ class BadgeCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 if (isCompleted)
-                  Text("🏆 ACHIEVED",
-                      style: TextStyle(color: Colors.yellow[700], fontWeight: FontWeight.bold, fontSize: 14))
+                  Text(
+                    "🏆 ACHIEVED",
+                    style: TextStyle(
+                      color: Colors.yellow[700],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  )
                 else if (isNotReached)
-                  const Text("🔒 LOCKED (0%)",
-                      style: TextStyle(color: Colors.redAccent, fontSize: 14))
+                  const Text(
+                    "🔒 LOCKED (0%)",
+                    style: TextStyle(color: Colors.redAccent, fontSize: 14),
+                  )
                 else
                   Column(
                     children: [
@@ -575,8 +709,13 @@ class BadgeCard extends StatelessWidget {
                         valueColor: AlwaysStoppedAnimation<Color>(badge.color),
                       ),
                       const SizedBox(height: 4),
-                      Text("Progress: ${badge.status}",
-                          style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text(
+                        "Progress: ${badge.status}",
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
               ],
