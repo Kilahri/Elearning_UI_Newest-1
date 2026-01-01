@@ -45,6 +45,10 @@ flutter {
 
 dependencies {
     // Add any additional dependencies here if needed
+<<<<<<< HEAD
 }
 
 apply(plugin = "com.google.gms.google-services")
+=======
+}
+>>>>>>> 0d084040d6640ed226a6f64e79643041ccb67eb4

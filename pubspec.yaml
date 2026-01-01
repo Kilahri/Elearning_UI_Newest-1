@@ -23,10 +23,13 @@ dependencies:
   cupertino_icons: ^1.0.8
   flame_forge2d: ^0.19.0+4
   confetti: ^0.7.0
+<<<<<<< HEAD
   firebase_core: ^2.32.0
   firebase_auth: ^4.15.3
   cloud_firestore: ^4.13.6
   firebase_storage: ^11.5.6
+=======
+>>>>>>> 0d084040d6640ed226a6f64e79643041ccb67eb4
   # cloud_firestore: ^4.13.6
    #firebase_core: ^2.24.2
 
