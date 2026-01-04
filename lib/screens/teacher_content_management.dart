@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+<<<<<<< HEAD
 import 'package:elearningapp_flutter/screens/read_screen.dart'
     show scienceBooks, spaceBooks, Book;
 import 'package:elearningapp_flutter/data/video_data.dart'
@@ -19,6 +20,17 @@ import 'package:elearningapp_flutter/data/video_data.dart'
 /// - Video URLs: YouTube, direct video links, or local paths
 /// - Image URLs: Remote URLs or local asset paths
 /// - All media inputs support multiple formats for flexibility
+=======
+import 'package:elearningapp_flutter/screens/read_screen.dart' as read_screen;
+import 'package:elearningapp_flutter/data/video_data.dart';
+import 'package:elearningapp_flutter/screens/book_content_editor_screen.dart';
+
+/// Comprehensive Teacher Content Management Screen
+/// Allows teachers to Create, Read, Update, and Delete content for:
+/// - Read (Books)
+/// - Watch (Videos/Lessons)
+/// - Play (Games)
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
 class TeacherContentManagementScreen extends StatefulWidget {
   const TeacherContentManagementScreen({super.key});
 
@@ -96,6 +108,11 @@ class ReadContentManagement extends StatefulWidget {
 
 class _ReadContentManagementState extends State<ReadContentManagement> {
   List<Map<String, dynamic>> allBooks = [];
+<<<<<<< HEAD
+=======
+  List<Map<String, dynamic>> teacherCreatedBooks = [];
+  Map<String, Map<String, dynamic>> modifiedOriginalBooks = {};
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
   bool _isLoading = true;
 
   @override
@@ -104,6 +121,7 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
     _loadBooks();
   }
 
+<<<<<<< HEAD
   Map<String, dynamic> _bookToMap(
     Book book, {
     bool isDefault = false,
@@ -113,11 +131,19 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
       'id': id ?? DateTime.now().millisecondsSinceEpoch.toString(),
       'isDefault': isDefault,
       'title': book.title,
+=======
+  // Convert Book object to Map
+  Map<String, dynamic> _bookToMap(read_screen.Book book) {
+    return {
+      'title': book.title,
+      'image': book.image,
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
       'summary': book.summary,
       'theme': book.theme,
       'author': book.author,
       'readTime': book.readTime,
       'funFact': book.funFact,
+<<<<<<< HEAD
       'image': book.image,
       'chapters':
           book.chapters
@@ -129,6 +155,18 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                   'didYouKnow': ch.didYouKnow,
                   'quizQuestions':
                       ch.quizQuestions
+=======
+      'chapters':
+          book.chapters
+              .map(
+                (chapter) => {
+                  'title': chapter.title,
+                  'content': chapter.content,
+                  'keyPoints': chapter.keyPoints,
+                  'didYouKnow': chapter.didYouKnow,
+                  'quizQuestions':
+                      chapter.quizQuestions
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                           .map(
                             (q) => {
                               'question': q.question,
@@ -141,6 +179,11 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                 },
               )
               .toList(),
+<<<<<<< HEAD
+=======
+      'isOriginal': true,
+      'id': book.title, // Use title as unique ID
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     };
   }
 
@@ -148,6 +191,7 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
     setState(() => _isLoading = true);
     final prefs = await SharedPreferences.getInstance();
 
+<<<<<<< HEAD
     List<Map<String, dynamic>> defaultBooks = [];
     int index = 0;
     for (var book in [...scienceBooks, ...spaceBooks]) {
@@ -201,6 +245,68 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
 
     setState(() {
       allBooks = [...defaultBooks, ...teacherBooks];
+=======
+    // Load teacher-created books
+    String? booksJson = prefs.getString('teacher_books');
+    if (booksJson != null) {
+      try {
+        teacherCreatedBooks = List<Map<String, dynamic>>.from(
+          jsonDecode(booksJson),
+        );
+        teacherCreatedBooks.forEach((book) {
+          book['isOriginal'] = false;
+          book['id'] =
+              book['title'] ?? DateTime.now().millisecondsSinceEpoch.toString();
+        });
+      } catch (e) {
+        teacherCreatedBooks = [];
+      }
+    }
+
+    // Load modified original books
+    String? modifiedJson = prefs.getString('modified_original_books');
+    if (modifiedJson != null) {
+      try {
+        final decoded = jsonDecode(modifiedJson) as Map<String, dynamic>;
+        modifiedOriginalBooks = Map<String, Map<String, dynamic>>.from(
+          decoded.map(
+            (key, value) => MapEntry(key, Map<String, dynamic>.from(value)),
+          ),
+        );
+      } catch (e) {
+        modifiedOriginalBooks = {};
+      }
+    }
+
+    // Load hardcoded books and convert to Map
+    List<Map<String, dynamic>> originalBooks = [];
+
+    // Add scienceBooks
+    for (var book in read_screen.scienceBooks) {
+      final bookId = book.title;
+      // Check if this original book has been modified
+      if (modifiedOriginalBooks.containsKey(bookId)) {
+        originalBooks.add(modifiedOriginalBooks[bookId]!);
+      } else {
+        originalBooks.add(_bookToMap(book));
+      }
+    }
+
+    // Add spaceBooks
+    for (var book in read_screen.spaceBooks) {
+      final bookId = book.title;
+      // Check if this original book has been modified
+      if (modifiedOriginalBooks.containsKey(bookId)) {
+        originalBooks.add(modifiedOriginalBooks[bookId]!);
+      } else {
+        originalBooks.add(_bookToMap(book));
+      }
+    }
+
+    // Merge all books: original first, then teacher-created
+    setState(() {
+      allBooks = [...originalBooks, ...teacherCreatedBooks];
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
       _isLoading = false;
     });
   }
@@ -208,6 +314,7 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
   Future<void> _saveBooks() async {
     final prefs = await SharedPreferences.getInstance();
 
+<<<<<<< HEAD
     List<Map<String, dynamic>> teacherBooks = [];
     Map<String, dynamic> modifiedBooks = {};
 
@@ -221,10 +328,32 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
 
     await prefs.setString('teacher_books', jsonEncode(teacherBooks));
     await prefs.setString('modified_default_books', jsonEncode(modifiedBooks));
+=======
+    // Save teacher-created books (filter out original books)
+    final booksToSave =
+        teacherCreatedBooks.map((book) {
+          final bookCopy = Map<String, dynamic>.from(book);
+          bookCopy.remove('isOriginal');
+          bookCopy.remove('id');
+          return bookCopy;
+        }).toList();
+    await prefs.setString('teacher_books', jsonEncode(booksToSave));
+
+    // Save modified original books
+    await prefs.setString(
+      'modified_original_books',
+      jsonEncode(modifiedOriginalBooks),
+    );
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
   }
 
   void _showCreateBookDialog({Map<String, dynamic>? existingBook, int? index}) {
     final isEdit = existingBook != null;
+<<<<<<< HEAD
+=======
+    final isOriginal = existingBook?['isOriginal'] == true;
+    final bookId = existingBook?['id'] ?? existingBook?['title'];
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     final titleController = TextEditingController(
       text: existingBook?['title'] ?? '',
     );
@@ -329,6 +458,7 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                     ),
                     style: const TextStyle(color: Colors.white),
                   ),
+<<<<<<< HEAD
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -389,6 +519,18 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                         ),
                       ],
                     ),
+=======
+                  TextField(
+                    controller: imageController,
+                    decoration: const InputDecoration(
+                      labelText: 'Image Path',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white54),
+                      ),
+                    ),
+                    style: const TextStyle(color: Colors.white),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   ),
                 ],
               ),
@@ -402,6 +544,7 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                 ),
               ),
               ElevatedButton(
+<<<<<<< HEAD
                 onPressed: () async {
                   if (titleController.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -428,6 +571,30 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                         existingBook?['id'] ??
                         DateTime.now().millisecondsSinceEpoch.toString(),
                     'isDefault': existingBook?['isDefault'] ?? false,
+=======
+                onPressed: () {
+                  // Ensure book has at least one default chapter if chapters list is empty
+                  List<dynamic> chapters = existingBook?['chapters'] ?? [];
+                  if (chapters.isEmpty && !isEdit) {
+                    // Add a default chapter for new books
+                    chapters = [
+                      {
+                        'title': 'Introduction',
+                        'content':
+                            'Welcome to ${titleController.text}! This is the first chapter. You can edit this book to add more content.',
+                        'keyPoints': [
+                          'This is a placeholder chapter',
+                          'Edit the book to add more content',
+                        ],
+                        'didYouKnow':
+                            'You can add more chapters by editing this book!',
+                        'quizQuestions': [],
+                      },
+                    ];
+                  }
+
+                  final book = {
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                     'title': titleController.text,
                     'summary': summaryController.text,
                     'theme': themeController.text,
@@ -435,6 +602,7 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                     'readTime': int.tryParse(readTimeController.text) ?? 15,
                     'funFact': funFactController.text,
                     'image': imageController.text,
+<<<<<<< HEAD
                     'chapters': existingBook?['chapters'] ?? [],
                   };
 
@@ -450,6 +618,37 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                   Navigator.pop(context);
                   await _loadBooks();
 
+=======
+                    'chapters': chapters,
+                    'id': bookId ?? titleController.text,
+                    'isOriginal': isOriginal,
+                  };
+
+                  if (isEdit && index != null) {
+                    if (isOriginal) {
+                      // Update modified original book
+                      modifiedOriginalBooks[bookId] = book;
+                    } else {
+                      // Update teacher-created book
+                      final teacherIndex = teacherCreatedBooks.indexWhere(
+                        (b) => b['id'] == bookId,
+                      );
+                      if (teacherIndex != -1) {
+                        teacherCreatedBooks[teacherIndex] = book;
+                      }
+                    }
+                    // Update in allBooks list
+                    allBooks[index] = book;
+                  } else {
+                    // New book - add to teacher-created
+                    book['isOriginal'] = false;
+                    teacherCreatedBooks.add(book);
+                  }
+
+                  _saveBooks();
+                  Navigator.pop(context);
+                  _loadBooks();
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(isEdit ? 'Book updated!' : 'Book created!'),
@@ -467,9 +666,59 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
     );
   }
 
+<<<<<<< HEAD
   void _deleteBook(int index) async {
     final book = allBooks[index];
     final isDefault = book['isDefault'] == true;
+=======
+  void _editBookContent(Map<String, dynamic> book, int index) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => BookContentEditorScreen(
+              book: book,
+              onSave: (updatedBook) {
+                final bookId = book['id'] ?? book['title'];
+                final isOriginal = book['isOriginal'] == true;
+
+                if (isOriginal) {
+                  modifiedOriginalBooks[bookId] = updatedBook;
+                } else {
+                  final teacherIndex = teacherCreatedBooks.indexWhere(
+                    (b) => b['id'] == bookId,
+                  );
+                  if (teacherIndex != -1) {
+                    teacherCreatedBooks[teacherIndex] = updatedBook;
+                  }
+                }
+                allBooks[index] = updatedBook;
+                _saveBooks();
+                _loadBooks();
+              },
+            ),
+      ),
+    );
+  }
+
+  void _deleteBook(int index) {
+    final book = allBooks[index];
+    final isOriginal = book['isOriginal'] == true;
+    final bookId = book['id'] ?? book['title'];
+
+    // Don't allow deletion of original books, only modifications can be reverted
+    if (isOriginal && !modifiedOriginalBooks.containsKey(bookId)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Original books cannot be deleted. You can modify them instead.',
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
 
     showDialog(
       context: context,
@@ -481,7 +730,11 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
               style: TextStyle(color: Colors.white),
             ),
             content: Text(
+<<<<<<< HEAD
               'Are you sure you want to permanently delete "${book['title']}"?',
+=======
+              'Are you sure you want to delete "${allBooks[index]['title']}"?',
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
               style: const TextStyle(color: Colors.white70),
             ),
             actions: [
@@ -493,6 +746,7 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                 ),
               ),
               ElevatedButton(
+<<<<<<< HEAD
                 onPressed: () async {
                   setState(() {
                     allBooks.removeAt(index);
@@ -523,6 +777,19 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                   Navigator.pop(context);
                   await _loadBooks();
 
+=======
+                onPressed: () {
+                  if (isOriginal && modifiedOriginalBooks.containsKey(bookId)) {
+                    // Remove modification to restore original
+                    modifiedOriginalBooks.remove(bookId);
+                  } else {
+                    // Remove from teacher-created books
+                    teacherCreatedBooks.removeWhere((b) => b['id'] == bookId);
+                  }
+                  _saveBooks();
+                  Navigator.pop(context);
+                  _loadBooks();
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Book deleted!'),
@@ -538,6 +805,7 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
     );
   }
 
+<<<<<<< HEAD
   void _manageChapters(int bookIndex) async {
     final result = await Navigator.push(
       context,
@@ -559,6 +827,8 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
     }
   }
 
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -567,11 +837,14 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
       );
     }
 
+<<<<<<< HEAD
     List<Map<String, dynamic>> defaultBooksList =
         allBooks.where((b) => b['isDefault'] == true).toList();
     List<Map<String, dynamic>> teacherBooksList =
         allBooks.where((b) => b['isDefault'] != true).toList();
 
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     return Column(
       children: [
         Padding(
@@ -579,6 +852,7 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+<<<<<<< HEAD
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -595,6 +869,15 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                     style: const TextStyle(color: Colors.white54, fontSize: 12),
                   ),
                 ],
+=======
+              Text(
+                'Books (${allBooks.length})',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
               ),
               ElevatedButton.icon(
                 onPressed: () => _showCreateBookDialog(),
@@ -640,13 +923,18 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemBuilder: (context, index) {
                       final book = allBooks[index];
+<<<<<<< HEAD
                       final isDefault = book['isDefault'] == true;
                       final chapterCount =
                           (book['chapters'] as List?)?.length ?? 0;
+=======
+                      final isOriginal = book['isOriginal'] == true;
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                       return Card(
                         color: const Color(0xFF1C1F3E),
                         margin: const EdgeInsets.only(bottom: 12),
                         child: ListTile(
+<<<<<<< HEAD
                           leading: Stack(
                             children: [
                               Icon(
@@ -707,16 +995,68 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                                   ),
                                 ),
                             ],
+=======
+                          leading: const Icon(
+                            Icons.menu_book,
+                            color: Color(0xFF7B4DFF),
+                          ),
+                          title: Text(
+                            book['title'] ?? 'Untitled',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+<<<<<<< HEAD
                               Text(
                                 book['theme'] ?? 'No theme',
                                 style: const TextStyle(color: Colors.white70),
                               ),
                               Text(
                                 'By ${book['author'] ?? 'Unknown'} • ${book['readTime'] ?? 15} min • $chapterCount chapters',
+=======
+                              Row(
+                                children: [
+                                  Text(
+                                    book['theme'] ?? 'No theme',
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                  if (isOriginal) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withOpacity(0.3),
+                                        borderRadius: BorderRadius.circular(4),
+                                        border: Border.all(
+                                          color: Colors.blue,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Original',
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              Text(
+                                'By ${book['author'] ?? 'Unknown'}',
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                                 style: const TextStyle(
                                   color: Colors.white54,
                                   fontSize: 12,
@@ -729,17 +1069,29 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                             children: [
                               IconButton(
                                 icon: const Icon(
+<<<<<<< HEAD
                                   Icons.library_books,
                                   color: Colors.green,
                                 ),
                                 onPressed: () => _manageChapters(index),
                                 tooltip: 'Manage Chapters',
+=======
+                                  Icons.article,
+                                  color: Colors.green,
+                                ),
+                                tooltip: 'Edit Content',
+                                onPressed: () => _editBookContent(book, index),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                               ),
                               IconButton(
                                 icon: const Icon(
                                   Icons.edit,
                                   color: Colors.blue,
                                 ),
+<<<<<<< HEAD
+=======
+                                tooltip: 'Edit Details',
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                                 onPressed:
                                     () => _showCreateBookDialog(
                                       existingBook: book,
@@ -751,6 +1103,10 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
                                   Icons.delete,
                                   color: Colors.red,
                                 ),
+<<<<<<< HEAD
+=======
+                                tooltip: 'Delete',
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                                 onPressed: () => _deleteBook(index),
                               ),
                             ],
@@ -766,6 +1122,7 @@ class _ReadContentManagementState extends State<ReadContentManagement> {
 }
 
 // ============================================================================
+<<<<<<< HEAD
 // CHAPTER MANAGEMENT SCREEN
 // ============================================================================
 
@@ -1759,6 +2116,8 @@ class _QuizQuestionEditorScreenState extends State<QuizQuestionEditorScreen> {
 }
 
 // ============================================================================
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
 // WATCH CONTENT MANAGEMENT
 // ============================================================================
 
@@ -1771,6 +2130,11 @@ class WatchContentManagement extends StatefulWidget {
 
 class _WatchContentManagementState extends State<WatchContentManagement> {
   List<Map<String, dynamic>> allVideos = [];
+<<<<<<< HEAD
+=======
+  List<Map<String, dynamic>> teacherCreatedVideos = [];
+  Map<String, Map<String, dynamic>> modifiedOriginalVideos = {};
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
   bool _isLoading = true;
 
   @override
@@ -1779,6 +2143,7 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
     _loadVideos();
   }
 
+<<<<<<< HEAD
   Map<String, dynamic> _lessonToMap(
     ScienceLesson lesson, {
     bool isDefault = false,
@@ -1787,6 +2152,11 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
     return {
       'id': id ?? DateTime.now().millisecondsSinceEpoch.toString(),
       'isDefault': isDefault,
+=======
+  // Convert ScienceLesson object to Map
+  Map<String, dynamic> _videoToMap(ScienceLesson lesson) {
+    return {
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
       'title': lesson.title,
       'emoji': lesson.emoji,
       'description': lesson.description,
@@ -1807,6 +2177,11 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                 },
               )
               .toList(),
+<<<<<<< HEAD
+=======
+      'isOriginal': true,
+      'id': lesson.title, // Use title as unique ID
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     };
   }
 
@@ -1814,6 +2189,7 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
     setState(() => _isLoading = true);
     final prefs = await SharedPreferences.getInstance();
 
+<<<<<<< HEAD
     List<Map<String, dynamic>> defaultVideos = [];
     int index = 0;
     for (var lesson in scienceLessons) {
@@ -1869,6 +2245,56 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
 
     setState(() {
       allVideos = [...defaultVideos, ...teacherVideos];
+=======
+    // Load teacher-created videos
+    String? videosJson = prefs.getString('teacher_videos');
+    if (videosJson != null) {
+      try {
+        teacherCreatedVideos = List<Map<String, dynamic>>.from(
+          jsonDecode(videosJson),
+        );
+        teacherCreatedVideos.forEach((video) {
+          video['isOriginal'] = false;
+          video['id'] =
+              video['title'] ??
+              DateTime.now().millisecondsSinceEpoch.toString();
+        });
+      } catch (e) {
+        teacherCreatedVideos = [];
+      }
+    }
+
+    // Load modified original videos
+    String? modifiedJson = prefs.getString('modified_original_videos');
+    if (modifiedJson != null) {
+      try {
+        final decoded = jsonDecode(modifiedJson) as Map<String, dynamic>;
+        modifiedOriginalVideos = Map<String, Map<String, dynamic>>.from(
+          decoded.map(
+            (key, value) => MapEntry(key, Map<String, dynamic>.from(value)),
+          ),
+        );
+      } catch (e) {
+        modifiedOriginalVideos = {};
+      }
+    }
+
+    // Load hardcoded videos and convert to Map
+    List<Map<String, dynamic>> originalVideos = [];
+    for (var lesson in scienceLessons) {
+      final videoId = lesson.title;
+      // Check if this original video has been modified
+      if (modifiedOriginalVideos.containsKey(videoId)) {
+        originalVideos.add(modifiedOriginalVideos[videoId]!);
+      } else {
+        originalVideos.add(_videoToMap(lesson));
+      }
+    }
+
+    // Merge all videos: original first, then teacher-created
+    setState(() {
+      allVideos = [...originalVideos, ...teacherCreatedVideos];
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
       _isLoading = false;
     });
   }
@@ -1876,6 +2302,7 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
   Future<void> _saveVideos() async {
     final prefs = await SharedPreferences.getInstance();
 
+<<<<<<< HEAD
     List<Map<String, dynamic>> teacherVideos = [];
     Map<String, dynamic> modifiedVideos = {};
 
@@ -1891,6 +2318,22 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
     await prefs.setString(
       'modified_default_videos',
       jsonEncode(modifiedVideos),
+=======
+    // Save teacher-created videos
+    final videosToSave =
+        teacherCreatedVideos.map((video) {
+          final videoCopy = Map<String, dynamic>.from(video);
+          videoCopy.remove('isOriginal');
+          videoCopy.remove('id');
+          return videoCopy;
+        }).toList();
+    await prefs.setString('teacher_videos', jsonEncode(videosToSave));
+
+    // Save modified original videos
+    await prefs.setString(
+      'modified_original_videos',
+      jsonEncode(modifiedOriginalVideos),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     );
   }
 
@@ -1899,6 +2342,11 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
     int? index,
   }) {
     final isEdit = existingVideo != null;
+<<<<<<< HEAD
+=======
+    final isOriginal = existingVideo?['isOriginal'] == true;
+    final videoId = existingVideo?['id'] ?? existingVideo?['title'];
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     final titleController = TextEditingController(
       text: existingVideo?['title'] ?? '',
     );
@@ -1965,6 +2413,7 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                     ),
                     style: const TextStyle(color: Colors.white),
                   ),
+<<<<<<< HEAD
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -2028,6 +2477,19 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                     ),
                   ),
                   const SizedBox(height: 8),
+=======
+                  TextField(
+                    controller: videoUrlController,
+                    decoration: const InputDecoration(
+                      labelText: 'Video URL (asset path or network URL)',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white54),
+                      ),
+                    ),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   TextField(
                     controller: durationController,
                     decoration: const InputDecoration(
@@ -2063,6 +2525,7 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                 ),
               ),
               ElevatedButton(
+<<<<<<< HEAD
                 onPressed: () async {
                   if (titleController.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -2089,6 +2552,10 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                         existingVideo?['id'] ??
                         DateTime.now().millisecondsSinceEpoch.toString(),
                     'isDefault': existingVideo?['isDefault'] ?? false,
+=======
+                onPressed: () {
+                  final video = {
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                     'title': titleController.text,
                     'emoji': emojiController.text,
                     'description': descriptionController.text,
@@ -2098,6 +2565,7 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                     'keyTopics': existingVideo?['keyTopics'] ?? [],
                     'moreFacts': existingVideo?['moreFacts'] ?? [],
                     'quizQuestions': existingVideo?['quizQuestions'] ?? [],
+<<<<<<< HEAD
                   };
 
                   setState(() {
@@ -2112,6 +2580,36 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                   Navigator.pop(context);
                   await _loadVideos();
 
+=======
+                    'id': videoId ?? titleController.text,
+                    'isOriginal': isOriginal,
+                  };
+
+                  if (isEdit && index != null) {
+                    if (isOriginal) {
+                      // Update modified original video
+                      modifiedOriginalVideos[videoId] = video;
+                    } else {
+                      // Update teacher-created video
+                      final teacherIndex = teacherCreatedVideos.indexWhere(
+                        (v) => v['id'] == videoId,
+                      );
+                      if (teacherIndex != -1) {
+                        teacherCreatedVideos[teacherIndex] = video;
+                      }
+                    }
+                    // Update in allVideos list
+                    allVideos[index] = video;
+                  } else {
+                    // New video - add to teacher-created
+                    video['isOriginal'] = false;
+                    teacherCreatedVideos.add(video);
+                  }
+
+                  _saveVideos();
+                  Navigator.pop(context);
+                  _loadVideos();
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -2131,9 +2629,29 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
     );
   }
 
+<<<<<<< HEAD
   void _deleteVideo(int index) async {
     final video = allVideos[index];
     final isDefault = video['isDefault'] == true;
+=======
+  void _deleteVideo(int index) {
+    final video = allVideos[index];
+    final isOriginal = video['isOriginal'] == true;
+    final videoId = video['id'] ?? video['title'];
+
+    // Don't allow deletion of original videos, only modifications can be reverted
+    if (isOriginal && !modifiedOriginalVideos.containsKey(videoId)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Original videos cannot be deleted. You can modify them instead.',
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
 
     showDialog(
       context: context,
@@ -2145,7 +2663,11 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
               style: TextStyle(color: Colors.white),
             ),
             content: Text(
+<<<<<<< HEAD
               'Are you sure you want to permanently delete "${video['title']}"?',
+=======
+              'Are you sure you want to delete "${allVideos[index]['title']}"?',
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
               style: const TextStyle(color: Colors.white70),
             ),
             actions: [
@@ -2157,6 +2679,7 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                 ),
               ),
               ElevatedButton(
+<<<<<<< HEAD
                 onPressed: () async {
                   setState(() {
                     allVideos.removeAt(index);
@@ -2187,6 +2710,20 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                   Navigator.pop(context);
                   await _loadVideos();
 
+=======
+                onPressed: () {
+                  if (isOriginal &&
+                      modifiedOriginalVideos.containsKey(videoId)) {
+                    // Remove modification to restore original
+                    modifiedOriginalVideos.remove(videoId);
+                  } else {
+                    // Remove from teacher-created videos
+                    teacherCreatedVideos.removeWhere((v) => v['id'] == videoId);
+                  }
+                  _saveVideos();
+                  Navigator.pop(context);
+                  _loadVideos();
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Video deleted!'),
@@ -2210,11 +2747,14 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
       );
     }
 
+<<<<<<< HEAD
     List<Map<String, dynamic>> defaultVideosList =
         allVideos.where((v) => v['isDefault'] == true).toList();
     List<Map<String, dynamic>> teacherVideosList =
         allVideos.where((v) => v['isDefault'] != true).toList();
 
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     return Column(
       children: [
         Padding(
@@ -2222,6 +2762,7 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+<<<<<<< HEAD
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -2238,6 +2779,15 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                     style: const TextStyle(color: Colors.white54, fontSize: 12),
                   ),
                 ],
+=======
+              Text(
+                'Video Lessons (${allVideos.length})',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
               ),
               ElevatedButton.icon(
                 onPressed: () => _showCreateVideoDialog(),
@@ -2283,11 +2833,16 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemBuilder: (context, index) {
                       final video = allVideos[index];
+<<<<<<< HEAD
                       final isDefault = video['isDefault'] == true;
+=======
+                      final isOriginal = video['isOriginal'] == true;
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                       return Card(
                         color: const Color(0xFF1C1F3E),
                         margin: const EdgeInsets.only(bottom: 12),
                         child: ListTile(
+<<<<<<< HEAD
                           leading: Stack(
                             children: [
                               Text(
@@ -2344,15 +2899,68 @@ class _WatchContentManagementState extends State<WatchContentManagement> {
                                   ),
                                 ),
                             ],
+=======
+                          leading: Text(
+                            video['emoji'] ?? '🎥',
+                            style: const TextStyle(fontSize: 32),
+                          ),
+                          title: Text(
+                            video['title'] ?? 'Untitled',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+<<<<<<< HEAD
                               Text(
                                 video['description'] ?? 'No description',
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(color: Colors.white70),
+=======
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      video['description'] ?? 'No description',
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                  ),
+                                  if (isOriginal) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withOpacity(0.3),
+                                        borderRadius: BorderRadius.circular(4),
+                                        border: Border.all(
+                                          color: Colors.blue,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        'Original',
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                               ),
                               Text(
                                 'Duration: ${video['duration'] ?? 'N/A'}',
@@ -2407,16 +3015,22 @@ class PlayContentManagement extends StatefulWidget {
   State<PlayContentManagement> createState() => _PlayContentManagementState();
 }
 
+<<<<<<< HEAD
 class _PlayContentManagementState extends State<PlayContentManagement>
     with SingleTickerProviderStateMixin {
   List<Map<String, dynamic>> allQuizTopics = [];
   List<Map<String, dynamic>> teacherGames = [];
   late TabController _tabController;
+=======
+class _PlayContentManagementState extends State<PlayContentManagement> {
+  List<Map<String, dynamic>> teacherGames = [];
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+<<<<<<< HEAD
     _tabController = TabController(length: 2, vsync: this);
     _loadGames();
   }
@@ -2579,10 +3193,32 @@ class _PlayContentManagementState extends State<PlayContentManagement>
       allQuizTopics = [...defaultTopics, ...teacherTopics];
       _isLoading = false;
     });
+=======
+    _loadGames();
+  }
+
+  Future<void> _loadGames() async {
+    setState(() => _isLoading = true);
+    final prefs = await SharedPreferences.getInstance();
+    String? gamesJson = prefs.getString('teacher_games');
+    if (gamesJson != null) {
+      try {
+        setState(() {
+          teacherGames = List<Map<String, dynamic>>.from(jsonDecode(gamesJson));
+          _isLoading = false;
+        });
+      } catch (e) {
+        setState(() => _isLoading = false);
+      }
+    } else {
+      setState(() => _isLoading = false);
+    }
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
   }
 
   Future<void> _saveGames() async {
     final prefs = await SharedPreferences.getInstance();
+<<<<<<< HEAD
 
     List<Map<String, dynamic>> teacherTopics = [];
     Map<String, dynamic> modifiedTopics = {};
@@ -2597,6 +3233,8 @@ class _PlayContentManagementState extends State<PlayContentManagement>
 
     await prefs.setString('teacher_quiz_topics', jsonEncode(teacherTopics));
     await prefs.setString('modified_quiz_topics', jsonEncode(modifiedTopics));
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     await prefs.setString('teacher_games', jsonEncode(teacherGames));
   }
 
@@ -2676,6 +3314,7 @@ class _PlayContentManagementState extends State<PlayContentManagement>
                     ),
                     style: const TextStyle(color: Colors.white),
                   ),
+<<<<<<< HEAD
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -2736,6 +3375,18 @@ class _PlayContentManagementState extends State<PlayContentManagement>
                         ),
                       ],
                     ),
+=======
+                  TextField(
+                    controller: imageController,
+                    decoration: const InputDecoration(
+                      labelText: 'Image Path',
+                      labelStyle: TextStyle(color: Colors.white70),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white54),
+                      ),
+                    ),
+                    style: const TextStyle(color: Colors.white),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   ),
                 ],
               ),
@@ -2749,6 +3400,7 @@ class _PlayContentManagementState extends State<PlayContentManagement>
                 ),
               ),
               ElevatedButton(
+<<<<<<< HEAD
                 onPressed: () async {
                   if (titleController.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -2770,12 +3422,16 @@ class _PlayContentManagementState extends State<PlayContentManagement>
                     return;
                   }
 
+=======
+                onPressed: () {
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   final game = {
                     'title': titleController.text,
                     'description': descriptionController.text,
                     'category': categoryController.text,
                     'gameType': gameTypeController.text,
                     'image': imageController.text,
+<<<<<<< HEAD
                     'createdAt':
                         existingGame?['createdAt'] ??
                         DateTime.now().toIso8601String(),
@@ -2793,6 +3449,18 @@ class _PlayContentManagementState extends State<PlayContentManagement>
                   Navigator.pop(context);
                   await _loadGames();
 
+=======
+                    'createdAt': DateTime.now().toIso8601String(),
+                  };
+                  if (isEdit && index != null) {
+                    teacherGames[index] = game;
+                  } else {
+                    teacherGames.add(game);
+                  }
+                  _saveGames();
+                  Navigator.pop(context);
+                  _loadGames();
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(isEdit ? 'Game updated!' : 'Game created!'),
@@ -2833,6 +3501,7 @@ class _PlayContentManagementState extends State<PlayContentManagement>
                 ),
               ),
               ElevatedButton(
+<<<<<<< HEAD
                 onPressed: () async {
                   setState(() {
                     teacherGames.removeAt(index);
@@ -2842,6 +3511,13 @@ class _PlayContentManagementState extends State<PlayContentManagement>
                   Navigator.pop(context);
                   await _loadGames();
 
+=======
+                onPressed: () {
+                  teacherGames.removeAt(index);
+                  _saveGames();
+                  Navigator.pop(context);
+                  _loadGames();
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Game deleted!'),
@@ -2857,6 +3533,7 @@ class _PlayContentManagementState extends State<PlayContentManagement>
     );
   }
 
+<<<<<<< HEAD
   void _showCreateQuizTopicDialog({
     Map<String, dynamic>? existingTopic,
     int? index,
@@ -3063,6 +3740,8 @@ class _PlayContentManagementState extends State<PlayContentManagement>
     }
   }
 
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -3073,6 +3752,7 @@ class _PlayContentManagementState extends State<PlayContentManagement>
 
     return Column(
       children: [
+<<<<<<< HEAD
         TabBar(
           controller: _tabController,
           labelColor: Colors.white,
@@ -3372,14 +4052,132 @@ class _PlayContentManagementState extends State<PlayContentManagement>
                             ),
                   ),
                 ],
+=======
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Games (${teacherGames.length})',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () => _showCreateGameDialog(),
+                icon: const Icon(Icons.add),
+                label: const Text('Create Game'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7B4DFF),
+                ),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
               ),
             ],
           ),
         ),
+<<<<<<< HEAD
+=======
+        Expanded(
+          child:
+              teacherGames.isEmpty
+                  ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.sports_esports,
+                          size: 64,
+                          color: Colors.white54,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'No games created yet',
+                          style: TextStyle(color: Colors.white54, fontSize: 16),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () => _showCreateGameDialog(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF7B4DFF),
+                          ),
+                          child: const Text('Create Your First Game'),
+                        ),
+                      ],
+                    ),
+                  )
+                  : ListView.builder(
+                    itemCount: teacherGames.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemBuilder: (context, index) {
+                      final game = teacherGames[index];
+                      return Card(
+                        color: const Color(0xFF1C1F3E),
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: ListTile(
+                          leading: const Icon(
+                            Icons.sports_esports,
+                            color: Color(0xFF7B4DFF),
+                          ),
+                          title: Text(
+                            game['title'] ?? 'Untitled',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                game['category'] ?? 'No category',
+                                style: const TextStyle(color: Colors.white70),
+                              ),
+                              Text(
+                                'Type: ${game['gameType'] ?? 'Unknown'}',
+                                style: const TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.edit,
+                                  color: Colors.blue,
+                                ),
+                                onPressed:
+                                    () => _showCreateGameDialog(
+                                      existingGame: game,
+                                      index: index,
+                                    ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () => _deleteGame(index),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+        ),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
       ],
     );
   }
 }
+<<<<<<< HEAD
 
 // ============================================================================
 // QUIZ TOPIC QUESTIONS MANAGEMENT SCREEN
@@ -3888,3 +4686,5 @@ class _QuizTopicQuestionEditorScreenState
     );
   }
 }
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9

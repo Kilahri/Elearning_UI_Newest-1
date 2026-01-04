@@ -48,7 +48,11 @@ class _RoleNavigationState extends State<RoleNavigation> {
       const WatchScreen(), // 2
       const ReadScreen(), // 3
       UniversalOverallLeaderboardScreen(username: widget.username), // 4
+<<<<<<< HEAD
       SettingsScreen(currentUsername: widget.username), // 5
+=======
+      const SettingsScreen(), // 5
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
       const TeacherCMSPage(), // 6
       const ProgressTrackingView(), // 7
       const TeacherContentManagementScreen(), // 8

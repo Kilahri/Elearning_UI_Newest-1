@@ -1,8 +1,11 @@
 // watch_screen.dart
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+<<<<<<< HEAD
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
 import 'package:elearningapp_flutter/quiz_data/video_quiz_screen.dart';
 import 'package:elearningapp_flutter/data/video_data.dart';
 
@@ -33,7 +36,10 @@ class _WatchScreenState extends State<WatchScreen>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _loadVideo(scienceLessons[currentLessonIndex].videoUrl);
+<<<<<<< HEAD
     _loadExistingNote();
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
   }
 
   void _loadVideo(String url) {
@@ -80,6 +86,7 @@ class _WatchScreenState extends State<WatchScreen>
     }
   }
 
+<<<<<<< HEAD
   Future<void> _loadExistingNote() async {
     final lesson = scienceLessons[currentLessonIndex];
     final existingNote = await NotesHelper.getVideoNoteForLesson(lesson.title);
@@ -192,6 +199,105 @@ class _WatchScreenState extends State<WatchScreen>
         lessonPoints[currentLessonIndex] =
             (lessonPoints[currentLessonIndex] ?? 0) + result;
       });
+=======
+  void _markLessonComplete() {
+    setState(() {
+      completedLessons.add(currentLessonIndex);
+      lessonPoints[currentLessonIndex] = 20;
+      totalPoints += 20;
+    });
+
+    // Show completion dialog
+    _showCompletionDialog();
+  }
+
+  void _showCompletionDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xFF1C1F3E),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Row(
+              children: [
+                Icon(Icons.celebration, color: Color(0xFFFFC107), size: 32),
+                SizedBox(width: 10),
+                Text("Great Job!", style: TextStyle(color: Colors.white)),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "You completed this lesson!",
+                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7B4DFF),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Column(
+                    children: [
+                      Icon(Icons.star, color: Color(0xFFFFC107), size: 40),
+                      SizedBox(height: 8),
+                      Text(
+                        "+20 Points!",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  "Continue Learning",
+                  style: TextStyle(color: Color(0xFF7B4DFF)),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _navigateToQuiz();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4CAF50),
+                ),
+                child: const Text("Take Quiz +30 pts"),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _navigateToQuiz() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) =>
+                VideoQuizScreen(lesson: scienceLessons[currentLessonIndex]),
+      ),
+    );
+
+    if (result != null && result is int) {
+      setState(() {
+        totalPoints += result;
+        lessonPoints[currentLessonIndex] =
+            (lessonPoints[currentLessonIndex] ?? 0) + result;
+      });
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     }
   }
 
@@ -202,7 +308,10 @@ class _WatchScreenState extends State<WatchScreen>
         _isInitialized = false;
         _videoController.dispose();
         _loadVideo(scienceLessons[currentLessonIndex].videoUrl);
+<<<<<<< HEAD
         _loadExistingNote(); // Load notes for new lesson
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
       });
     }
   }
@@ -636,13 +745,20 @@ class _WatchScreenState extends State<WatchScreen>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+<<<<<<< HEAD
                             Row(
                               children: [
                                 const Icon(
+=======
+                            const Row(
+                              children: [
+                                Icon(
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                                   Icons.lightbulb,
                                   color: Color(0xFFFFC107),
                                   size: 24,
                                 ),
+<<<<<<< HEAD
                                 const SizedBox(width: 8),
                                 const Expanded(
                                   child: Column(
@@ -699,10 +815,30 @@ class _WatchScreenState extends State<WatchScreen>
                                         ),
                                       ),
                                     ],
+=======
+                                SizedBox(width: 8),
+                                Text(
+                                  "Your Learning Notes",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                                   ),
                                 ),
                               ],
                             ),
+<<<<<<< HEAD
+=======
+                            const SizedBox(height: 4),
+                            const Text(
+                              "Write down important things you learned!",
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 13,
+                              ),
+                            ),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                             const SizedBox(height: 16),
                             Expanded(
                               child: TextField(
@@ -731,7 +867,21 @@ class _WatchScreenState extends State<WatchScreen>
                             ),
                             const SizedBox(height: 12),
                             ElevatedButton.icon(
+<<<<<<< HEAD
                               onPressed: _saveNotes,
+=======
+                              onPressed: () {
+                                if (_notesController.text.isNotEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Notes saved! ✓"),
+                                      backgroundColor: Color(0xFF4CAF50),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                }
+                              },
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                               icon: const Icon(Icons.save),
                               label: const Text("Save Notes"),
                               style: ElevatedButton.styleFrom(
@@ -1041,6 +1191,7 @@ class _WatchScreenState extends State<WatchScreen>
     );
   }
 }
+<<<<<<< HEAD
 
 // ============================================================================
 // NOTES HELPER CLASS
@@ -1137,3 +1288,5 @@ class NotesHelper {
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9

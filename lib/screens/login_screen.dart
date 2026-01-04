@@ -24,6 +24,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+<<<<<<< HEAD
+=======
+  // --- Teacher Credentials (Hardcoded) ---
+  final String _adminUser = "Teacher_Science";
+  final String _adminPass = "SciLearn2026";
+
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -47,6 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ],
+<<<<<<< HEAD
           ),
     );
   }
@@ -150,6 +158,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: const Text("Continue"),
               ),
             ],
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
           ),
     );
   }
@@ -165,6 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+<<<<<<< HEAD
     // 1. CHECK ADMIN ACCOUNT FIRST
     String adminUsername =
         prefs.getString('admin_username') ?? "Admin_SciLearn";
@@ -176,6 +187,35 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => const AdminPanelScreen()),
       );
       return;
+=======
+    // 1. CHECK TEACHER ACCOUNT FIRST (Hardcoded logic)
+    if (username == _adminUser && password == _adminPass) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => RoleNavigation(role: "teacher", username: username),
+        ),
+      );
+      return; // Stop here, teacher login successful
+    }
+
+    // 2. CHECK STUDENT ACCOUNT (From SharedPreferences)
+    String savedUsername = prefs.getString("username") ?? "";
+    String savedPassword = prefs.getString("password") ?? "";
+    String savedRole = prefs.getString("role") ?? "student";
+
+    if (username == savedUsername && password == savedPassword) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) => RoleNavigation(role: savedRole, username: username),
+        ),
+      );
+    } else {
+      _showErrorDialog("Invalid username or password.");
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     }
 
     // 2. CHECK TEACHERS LIST

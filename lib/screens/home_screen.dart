@@ -192,10 +192,14 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
+<<<<<<< HEAD
                     builder:
                         (context) => SettingsScreen(
                           currentUsername: username, // ✅ FIX: Pass the username
                         ),
+=======
+                    builder: (context) => const SettingsScreen(),
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                   ),
                 );
               },

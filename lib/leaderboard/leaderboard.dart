@@ -16,6 +16,7 @@ class UniversalLeaderboardService {
   static const String GAME_PUZZLE = 'puzzle';
   // Add more game IDs as needed
 
+<<<<<<< HEAD
   /// Get display name for a username (falls back to username if not set)
   static Future<String> getDisplayName(String username) async {
     final prefs = await SharedPreferences.getInstance();
@@ -23,6 +24,8 @@ class UniversalLeaderboardService {
     return displayName ?? username;
   }
 
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
   /// Save a game score
   /// @param username - Player's username
   /// @param gameId - Unique game identifier (e.g., 'quiz', 'memory', 'puzzle')
@@ -43,9 +46,12 @@ class UniversalLeaderboardService {
     // Get existing scores
     List<Map<String, dynamic>> allScores = await _getAllScores();
 
+<<<<<<< HEAD
     // Get display name
     String displayName = await getDisplayName(username);
 
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     // Calculate points (0-100 scale for consistency)
     int points = ((score / maxScore) * 100).round();
     int percentage = points;
@@ -53,7 +59,10 @@ class UniversalLeaderboardService {
     // Create score entry
     Map<String, dynamic> scoreEntry = {
       'username': username,
+<<<<<<< HEAD
       'displayName': displayName, // Store display name for leaderboard
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
       'gameId': gameId,
       'category': category,
       'score': score,
@@ -106,6 +115,7 @@ class UniversalLeaderboardService {
       allScores = allScores.where((s) => s['category'] == category).toList();
     }
 
+<<<<<<< HEAD
     // Update display names to ensure they're current
     for (var score in allScores) {
       String username = score['username'] as String;
@@ -113,6 +123,8 @@ class UniversalLeaderboardService {
       score['displayName'] = await getDisplayName(username);
     }
 
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     // Sort by percentage (descending), then by timestamp (most recent first)
     allScores.sort((a, b) {
       int percentageCompare = b['percentage'].compareTo(a['percentage']);
@@ -133,6 +145,7 @@ class UniversalLeaderboardService {
   /// Get overall leaderboard (all games combined, ranked by total points)
   static Future<List<Map<String, dynamic>>> getOverallLeaderboard() async {
     final prefs = await SharedPreferences.getInstance();
+<<<<<<< HEAD
     
     // Get all scores to find all unique players
     List<Map<String, dynamic>> allScores = await _getAllScores();
@@ -194,6 +207,18 @@ class UniversalLeaderboardService {
       
       leaderboard.add(stats);
     }
+=======
+    String? statsJson = prefs.getString(_userStatsKey);
+
+    if (statsJson == null) return [];
+
+    Map<String, dynamic> allStats = jsonDecode(statsJson);
+    List<Map<String, dynamic>> leaderboard = [];
+
+    allStats.forEach((username, stats) {
+      leaderboard.add(Map<String, dynamic>.from(stats));
+    });
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
 
     // Sort by total points (descending)
     leaderboard.sort((a, b) => b['totalPoints'].compareTo(a['totalPoints']));
@@ -281,9 +306,12 @@ class UniversalLeaderboardService {
 
     if (userScores.isEmpty) return;
 
+<<<<<<< HEAD
     // Get display name
     String displayName = await getDisplayName(username);
 
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
     // Calculate overall statistics
     int totalGames = userScores.length;
     int totalPoints = userScores.fold(
@@ -330,7 +358,10 @@ class UniversalLeaderboardService {
     // Save user stats
     Map<String, dynamic> stats = {
       'username': username,
+<<<<<<< HEAD
       'displayName': displayName,
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
       'totalGames': totalGames,
       'totalPoints': totalPoints,
       'averagePercentage': averagePercentage.round(),
@@ -465,7 +496,10 @@ class UniversalOverallLeaderboardScreen extends StatelessWidget {
       itemBuilder: (context, index) {
         var user = leaderboard[index];
         bool isCurrentUser = user['username'] == username;
+<<<<<<< HEAD
         String displayName = user['displayName'] ?? user['username'] ?? 'Unknown';
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
         String medal =
             index == 0
                 ? "🥇"
@@ -517,7 +551,11 @@ class UniversalOverallLeaderboardScreen extends StatelessWidget {
                     Row(
                       children: [
                         Text(
+<<<<<<< HEAD
                           displayName,
+=======
+                          user['username'],
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -778,7 +816,10 @@ class _UniversalGameLeaderboardScreenState
       itemBuilder: (context, index) {
         var score = leaderboard[index];
         bool isCurrentUser = score['username'] == widget.username;
+<<<<<<< HEAD
         String displayName = score['displayName'] ?? score['username'] ?? 'Unknown';
+=======
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
         String medal =
             index == 0
                 ? "🥇"
@@ -830,7 +871,11 @@ class _UniversalGameLeaderboardScreenState
                     Row(
                       children: [
                         Text(
+<<<<<<< HEAD
                           displayName,
+=======
+                          score['username'],
+>>>>>>> 800672d880d0dff424fb1136ac60193caeb661d9
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 18,
