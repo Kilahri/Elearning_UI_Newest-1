@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'dart:async';
 
 class TriviaScreen extends StatefulWidget {
   final String role;
@@ -9,64 +10,210 @@ class TriviaScreen extends StatefulWidget {
   State<TriviaScreen> createState() => _TriviaScreenState();
 }
 
+enum Difficulty { easy, medium, hard }
+
 class _TriviaScreenState extends State<TriviaScreen> {
-  // Maximum 10 levels
+  Difficulty? selectedDifficulty;
   int currentLevel = 1;
   int score = 0;
   int? firstIndex;
+  bool showLeaderboard = false;
+  List<LeaderboardEntry> leaderboard = [];
+  Timer? _timer;
+  int _remainingSeconds = 0;
 
-  // Cards data for each level
-  final List<List<Map<String, String>>> levels = [
-    // Level 1
-    [
-      {"term": "Photosynthesis", "definition": "Process by which plants make food"},
-      {"term": "Evaporation", "definition": "Liquid turning into gas"}
-    ],
-    // Level 2
-    [
-      {"term": "Oxygen", "definition": "Gas humans need to breathe"},
-      {"term": "Gravity", "definition": "Force that pulls objects down"}
-    ],
-    // Level 3
-    [
-      {"term": "Magnetism", "definition": "Force that attracts metals"},
-      {"term": "Condensation", "definition": "Gas turning into liquid"}
-    ],
-    // Level 4
-    [
-      {"term": "Solar System", "definition": "Planets orbiting the Sun"},
-      {"term": "Evaporation", "definition": "Liquid turning into gas"}
-    ],
-    // Level 5
-    [
-      {"term": "Plant Cell", "definition": "Cell of a plant"},
-      {"term": "Animal Cell", "definition": "Cell of an animal"}
-    ],
-    // Level 6
-    [
-      {"term": "Inertia", "definition": "Object stays at rest or motion"},
-      {"term": "Friction", "definition": "Resistance when surfaces move"}
-    ],
-    // Level 7
-    [
-      {"term": "Photosynthesis", "definition": "Process by which plants make food"},
-      {"term": "Respiration", "definition": "Process of releasing energy"}
-    ],
-    // Level 8
-    [
-      {"term": "Acid", "definition": "Substance with pH<7"},
-      {"term": "Base", "definition": "Substance with pH>7"}
-    ],
-    // Level 9
-    [
-      {"term": "Evaporation", "definition": "Liquid turning into gas"},
-      {"term": "Precipitation", "definition": "Water falling from clouds"}
-    ],
-    // Level 10
-    [
-      {"term": "Force", "definition": "Push or pull on an object"},
-      {"term": "Energy", "definition": "Ability to do work"}
-    ],
+  // Difficulty settings
+  Map<Difficulty, Map<String, dynamic>> difficultySettings = {
+    Difficulty.easy: {
+      'name': 'Easy',
+      'icon': '😊',
+      'color': Colors.green,
+      'pairsPerLevel': 2,
+      'timeLimit': 60,
+      'wrongPenalty': -2,
+      'correctPoints': 10,
+    },
+    Difficulty.medium: {
+      'name': 'Medium',
+      'icon': '🤔',
+      'color': Colors.orange,
+      'pairsPerLevel': 3,
+      'timeLimit': 45,
+      'wrongPenalty': -3,
+      'correctPoints': 15,
+    },
+    Difficulty.hard: {
+      'name': 'Hard',
+      'icon': '🔥',
+      'color': Colors.red,
+      'pairsPerLevel': 4,
+      'timeLimit': 30,
+      'wrongPenalty': -5,
+      'correctPoints': 20,
+    },
+  };
+
+  // All available terms (will be filtered by difficulty)
+  final List<Map<String, String>> allTerms = [
+    // Photosynthesis
+    {
+      "term": "🌱 Chlorophyll",
+      "definition": "Green pigment in plants",
+      "topic": "🌱 Photosynthesis",
+    },
+    {
+      "term": "☀️ Sunlight",
+      "definition": "Energy source for plants",
+      "topic": "🌱 Photosynthesis",
+    },
+    {
+      "term": "🍃 Photosynthesis",
+      "definition": "Plants making food from sunlight",
+      "topic": "🌱 Photosynthesis",
+    },
+    {
+      "term": "💨 Carbon Dioxide",
+      "definition": "Gas plants breathe in",
+      "topic": "🌱 Photosynthesis",
+    },
+    {
+      "term": "🌿 Oxygen",
+      "definition": "Gas plants release",
+      "topic": "🌱 Photosynthesis",
+    },
+    {
+      "term": "🍂 Glucose",
+      "definition": "Sugar made by plants",
+      "topic": "🌱 Photosynthesis",
+    },
+
+    // Solar System
+    {
+      "term": "☀️ Sun",
+      "definition": "Star at center of solar system",
+      "topic": "🪐 Solar System",
+    },
+    {
+      "term": "🌍 Earth",
+      "definition": "Third planet from the Sun",
+      "topic": "🪐 Solar System",
+    },
+    {
+      "term": "🌙 Moon",
+      "definition": "Natural satellite of Earth",
+      "topic": "🪐 Solar System",
+    },
+    {
+      "term": "🪐 Saturn",
+      "definition": "Planet with beautiful rings",
+      "topic": "🪐 Solar System",
+    },
+    {
+      "term": "🔴 Mars",
+      "definition": "The red planet",
+      "topic": "🪐 Solar System",
+    },
+    {
+      "term": "🌌 Galaxy",
+      "definition": "System of billions of stars",
+      "topic": "🪐 Solar System",
+    },
+
+    // Changes of Matter
+    {
+      "term": "💧 Melting",
+      "definition": "Solid turning into liquid",
+      "topic": "💧 Changes of Matter",
+    },
+    {
+      "term": "☁️ Evaporation",
+      "definition": "Liquid turning into gas",
+      "topic": "💧 Changes of Matter",
+    },
+    {
+      "term": "❄️ Freezing",
+      "definition": "Liquid turning into solid",
+      "topic": "💧 Changes of Matter",
+    },
+    {
+      "term": "💦 Condensation",
+      "definition": "Gas turning into liquid",
+      "topic": "💧 Changes of Matter",
+    },
+    {
+      "term": "🧊 Solid",
+      "definition": "Matter with fixed shape",
+      "topic": "💧 Changes of Matter",
+    },
+    {
+      "term": "💧 Liquid",
+      "definition": "Matter that flows",
+      "topic": "💧 Changes of Matter",
+    },
+
+    // Food Chain
+    {
+      "term": "🌿 Producer",
+      "definition": "Makes its own food",
+      "topic": "🦁 Food Chain",
+    },
+    {
+      "term": "🦌 Herbivore",
+      "definition": "Animal that eats plants",
+      "topic": "🦁 Food Chain",
+    },
+    {
+      "term": "🦁 Carnivore",
+      "definition": "Animal that eats meat",
+      "topic": "🦁 Food Chain",
+    },
+    {
+      "term": "🐻 Omnivore",
+      "definition": "Eats both plants and animals",
+      "topic": "🦁 Food Chain",
+    },
+    {
+      "term": "🦅 Predator",
+      "definition": "Hunter in food chain",
+      "topic": "🦁 Food Chain",
+    },
+    {
+      "term": "🐰 Prey",
+      "definition": "Animal that is hunted",
+      "topic": "🦁 Food Chain",
+    },
+
+    // Water Cycle
+    {
+      "term": "🌧️ Precipitation",
+      "definition": "Water falling from clouds",
+      "topic": "🌊 Water Cycle",
+    },
+    {
+      "term": "💧 Collection",
+      "definition": "Water gathering in oceans",
+      "topic": "🌊 Water Cycle",
+    },
+    {
+      "term": "☁️ Water Cycle",
+      "definition": "Continuous movement of water",
+      "topic": "🌊 Water Cycle",
+    },
+    {
+      "term": "🌊 Transpiration",
+      "definition": "Water release from plants",
+      "topic": "🌊 Water Cycle",
+    },
+    {
+      "term": "🌈 Runoff",
+      "definition": "Water flowing over land",
+      "topic": "🌊 Water Cycle",
+    },
+    {
+      "term": "💦 Condensation",
+      "definition": "Water vapor forming clouds",
+      "topic": "🌊 Water Cycle",
+    },
   ];
 
   List<String> _cards = [];
@@ -75,13 +222,84 @@ class _TriviaScreenState extends State<TriviaScreen> {
   @override
   void initState() {
     super.initState();
-    _prepareCards();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startGame(Difficulty difficulty) {
+    setState(() {
+      selectedDifficulty = difficulty;
+      currentLevel = 1;
+      score = 0;
+      _prepareCards();
+      _startTimer();
+    });
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    final settings = difficultySettings[selectedDifficulty]!;
+    setState(() {
+      _remainingSeconds = settings['timeLimit'] as int;
+    });
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _remainingSeconds--;
+      });
+
+      if (_remainingSeconds <= 0) {
+        _timer?.cancel();
+        _handleTimeUp();
+      }
+    });
+  }
+
+  void _handleTimeUp() {
+    _showMessage("⏰ Time's Up! Moving to next level", Colors.red);
+    Future.delayed(const Duration(seconds: 2), () {
+      if (currentLevel < 10) {
+        setState(() {
+          currentLevel++;
+          _prepareCards();
+          _startTimer();
+        });
+      } else {
+        _showMessage("🏆 Game Complete!", Colors.purple);
+        _addToLeaderboard();
+      }
+    });
   }
 
   void _prepareCards() {
-    final pairs = levels[currentLevel - 1];
+    if (selectedDifficulty == null) return;
+
+    final settings = difficultySettings[selectedDifficulty]!;
+    final pairsCount = settings['pairsPerLevel'] as int;
+
+    // Get terms for current topic
+    final topicIndex = (currentLevel - 1) % 5;
+    final topics = [
+      "🌱 Photosynthesis",
+      "🪐 Solar System",
+      "💧 Changes of Matter",
+      "🦁 Food Chain",
+      "🌊 Water Cycle",
+    ];
+    final currentTopic = topics[topicIndex];
+
+    final topicTerms =
+        allTerms.where((term) => term['topic'] == currentTopic).toList();
+    topicTerms.shuffle(Random());
+
+    final selectedPairs = topicTerms.take(pairsCount).toList();
+
     _cards = [];
-    for (var pair in pairs) {
+    for (var pair in selectedPairs) {
       _cards.add(pair['term']!);
       _cards.add(pair['definition']!);
     }
@@ -91,6 +309,8 @@ class _TriviaScreenState extends State<TriviaScreen> {
   }
 
   void _flipCard(int index) {
+    if (_remainingSeconds <= 0) return;
+
     setState(() {
       _flipped[index] = true;
     });
@@ -99,24 +319,44 @@ class _TriviaScreenState extends State<TriviaScreen> {
       firstIndex = index;
     } else {
       Future.delayed(const Duration(milliseconds: 800), () {
+        final settings = difficultySettings[selectedDifficulty]!;
+
         if (_isMatch(firstIndex!, index)) {
-          score += 10;
-          _showMessage("✅ Match found! +10 points", Colors.green);
+          setState(() {
+            score += settings['correctPoints'] as int;
+          });
+          _showMessage(
+            "🎉 Great Match! +${settings['correctPoints']} points",
+            Colors.green,
+          );
         } else {
-          _flipped[firstIndex!] = false;
-          _flipped[index] = false;
-          _showMessage("❌ Not a match", Colors.redAccent);
+          setState(() {
+            score += settings['wrongPenalty'] as int;
+            _flipped[firstIndex!] = false;
+            _flipped[index] = false;
+          });
+          _showMessage(
+            "❌ Wrong! ${settings['wrongPenalty']} points",
+            Colors.red,
+          );
         }
         firstIndex = null;
 
         // Check if level completed
         if (_flipped.every((f) => f)) {
+          _timer?.cancel();
           if (currentLevel < 10) {
-            currentLevel++;
-            _showMessage("🎉 Level $currentLevel!", Colors.blueAccent);
-            _prepareCards();
+            setState(() {
+              currentLevel++;
+            });
+            _showMessage("⭐ Level $currentLevel Unlocked!", Colors.blue);
+            Future.delayed(const Duration(seconds: 1), () {
+              _prepareCards();
+              _startTimer();
+            });
           } else {
-            _showMessage("🏆 You completed all levels!", Colors.purpleAccent);
+            _showMessage("🏆 Amazing! You Won!", Colors.purple);
+            _addToLeaderboard();
           }
         }
 
@@ -129,9 +369,9 @@ class _TriviaScreenState extends State<TriviaScreen> {
     String cardA = _cards[a];
     String cardB = _cards[b];
 
-    for (var pair in levels[currentLevel - 1]) {
-      if ((pair['term'] == cardA && pair['definition'] == cardB) ||
-          (pair['term'] == cardB && pair['definition'] == cardA)) {
+    for (var term in allTerms) {
+      if ((term['term'] == cardA && term['definition'] == cardB) ||
+          (term['term'] == cardB && term['definition'] == cardA)) {
         return true;
       }
     }
@@ -141,102 +381,555 @@ class _TriviaScreenState extends State<TriviaScreen> {
   void _showMessage(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content:
-            Text(message, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(
+          message,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         backgroundColor: color,
         duration: const Duration(seconds: 1),
       ),
     );
   }
 
+  void _addToLeaderboard() {
+    leaderboard.add(
+      LeaderboardEntry(
+        playerName: widget.role,
+        score: score,
+        date: DateTime.now(),
+        difficulty: selectedDifficulty!,
+      ),
+    );
+    leaderboard.sort((a, b) => b.score.compareTo(a.score));
+    if (leaderboard.length > 10) {
+      leaderboard = leaderboard.sublist(0, 10);
+    }
+  }
+
+  String _getLevelTopic() {
+    final topicIndex = (currentLevel - 1) % 5;
+    final topics = [
+      "🌱 Photosynthesis",
+      "🪐 Solar System",
+      "💧 Changes of Matter",
+      "🦁 Food Chain",
+      "🌊 Water Cycle",
+    ];
+    return topics[topicIndex];
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (showLeaderboard) {
+      return _buildLeaderboard();
+    }
+
+    if (selectedDifficulty == null) {
+      return _buildDifficultySelection();
+    }
+
+    return _buildGameScreen();
+  }
+
+  Widget _buildDifficultySelection() {
     return Scaffold(
-      backgroundColor: const Color(0xFF1E1F3E),
+      backgroundColor: const Color(0xFF1A237E),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF7B4DFF),
-        title: Text("Matching Game - ${widget.role}",
-            style: const TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFF4CAF50),
+        elevation: 0,
+        title: const Text(
+          "🎮 Science Matching Game",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: 16),
-          Text(
-            "Level: $currentLevel / 10 | Score: $score",
-            style: const TextStyle(
-                color: Colors.greenAccent,
-                fontWeight: FontWeight.bold,
-                fontSize: 18),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _cards.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12),
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: _flipped[index] ? null : () => _flipCard(index),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 400),
-                    decoration: BoxDecoration(
-                      color: _flipped[index]
-                          ? Colors.greenAccent
-                          : const Color(0xFF2C2F5E),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.white24, width: 2),
-                      boxShadow: _flipped[index]
-                          ? [
-                              const BoxShadow(
-                                  color: Colors.white24,
-                                  blurRadius: 6,
-                                  offset: Offset(2, 2))
-                            ]
-                          : [],
-                    ),
-                    alignment: Alignment.center,
-                    child: _flipped[index]
-                        ? Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              _cards[index],
-                              style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        : const Icon(Icons.help_outline,
-                            color: Colors.white, size: 40),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.leaderboard, size: 28),
             onPressed: () {
               setState(() {
-                score = 0;
-                currentLevel = 1;
-                _prepareCards();
+                showLeaderboard = true;
               });
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.purpleAccent,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-            ),
-            child: const Text("Restart Game",
-                style: TextStyle(color: Colors.white, fontSize: 16)),
           ),
-          const SizedBox(height: 16),
+        ],
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB)],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Choose Your Challenge!",
+                style: TextStyle(
+                  color: Colors.yellowAccent,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 40),
+              ...Difficulty.values.map((difficulty) {
+                final settings = difficultySettings[difficulty]!;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 32,
+                  ),
+                  child: ElevatedButton(
+                    onPressed: () => _startGame(difficulty),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: settings['color'] as Color,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 40,
+                        vertical: 24,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 8,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          settings['icon'] as String,
+                          style: const TextStyle(fontSize: 32),
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              settings['name'] as String,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "${settings['pairsPerLevel']} pairs • ${settings['timeLimit']}s • ${settings['wrongPenalty']} pts penalty",
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGameScreen() {
+    final settings = difficultySettings[selectedDifficulty]!;
+    final timerColor =
+        _remainingSeconds > 10 ? Colors.greenAccent : Colors.redAccent;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF1A237E),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF4CAF50),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            _timer?.cancel();
+            setState(() {
+              selectedDifficulty = null;
+              score = 0;
+              currentLevel = 1;
+            });
+          },
+        ),
+        title: const Text(
+          "🎮 Science Matching Game",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB)],
+          ),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white30, width: 2),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "${settings['icon']} ${settings['name']}",
+                        style: const TextStyle(
+                          color: Colors.yellowAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: timerColor.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: timerColor, width: 2),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.timer, color: timerColor, size: 20),
+                            const SizedBox(width: 4),
+                            Text(
+                              "$_remainingSeconds s",
+                              style: TextStyle(
+                                color: timerColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _getLevelTopic(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildInfoChip("Level $currentLevel/10", Icons.stars),
+                      _buildInfoChip("Score: $score", Icons.emoji_events),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _cards.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount:
+                      _cards.length <= 4
+                          ? 2
+                          : _cards.length <= 6
+                          ? 2
+                          : 3,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 1.2,
+                ),
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: _flipped[index] ? null : () => _flipCard(index),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 400),
+                      decoration: BoxDecoration(
+                        gradient:
+                            _flipped[index]
+                                ? const LinearGradient(
+                                  colors: [
+                                    Color(0xFF4CAF50),
+                                    Color(0xFF66BB6A),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                                : const LinearGradient(
+                                  colors: [
+                                    Color(0xFF5C6BC0),
+                                    Color(0xFF7E57C2),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.5),
+                          width: 3,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                                _flipped[index]
+                                    ? Colors.greenAccent.withOpacity(0.5)
+                                    : Colors.purpleAccent.withOpacity(0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child:
+                          _flipped[index]
+                              ? Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text(
+                                  _cards[index],
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                              : const Icon(
+                                Icons.lightbulb_outline,
+                                color: Colors.white,
+                                size: 50,
+                              ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoChip(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.yellowAccent, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
         ],
       ),
     );
   }
+
+  Widget _buildLeaderboard() {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1A237E),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFF6F00),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            setState(() {
+              showLeaderboard = false;
+            });
+          },
+        ),
+        title: const Text(
+          "🏆 Leaderboard",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB)],
+          ),
+        ),
+        child:
+            leaderboard.isEmpty
+                ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.emoji_events,
+                        size: 100,
+                        color: Colors.yellowAccent,
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        "No scores yet!",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        "Complete all levels to get on the board!",
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                )
+                : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: leaderboard.length,
+                  itemBuilder: (context, index) {
+                    final entry = leaderboard[index];
+                    final medal =
+                        index == 0
+                            ? "🥇"
+                            : index == 1
+                            ? "🥈"
+                            : index == 2
+                            ? "🥉"
+                            : "⭐";
+                    final diffSettings = difficultySettings[entry.difficulty]!;
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors:
+                              index < 3
+                                  ? [
+                                    const Color(0xFFFFD700).withOpacity(0.3),
+                                    const Color(0xFFFFA500).withOpacity(0.3),
+                                  ]
+                                  : [
+                                    Colors.white.withOpacity(0.1),
+                                    Colors.white.withOpacity(0.05),
+                                  ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.white30, width: 2),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(medal, style: const TextStyle(fontSize: 32)),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  entry.playerName,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      diffSettings['icon'] as String,
+                                      style: const TextStyle(fontSize: 14),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "${diffSettings['name']} • ${_formatDate(entry.date)}",
+                                      style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4CAF50),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              "${entry.score} pts",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return "${date.month}/${date.day}/${date.year}";
+  }
+}
+
+class LeaderboardEntry {
+  final String playerName;
+  final int score;
+  final DateTime date;
+  final Difficulty difficulty;
+
+  LeaderboardEntry({
+    required this.playerName,
+    required this.score,
+    required this.date,
+    required this.difficulty,
+  });
 }

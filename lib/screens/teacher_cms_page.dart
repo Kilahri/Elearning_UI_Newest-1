@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 // --- MAIN WIDGET ---
 class TeacherCMSPage extends StatefulWidget {
@@ -17,11 +19,17 @@ class _TeacherCMSPageState extends State<TeacherCMSPage> {
   final Color warningColor = const Color(0xFFFF9800);
 
   // Define all views here
-  final List<Widget> _widgetOptions = const <Widget>[
-    ContentManagementView(),
-    ProgressTrackingView(),
-    CommunicationView(),
-  ];
+  List<Widget> _widgetOptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _widgetOptions = <Widget>[
+      const ContentManagementView(),
+      const ProgressTrackingView(),
+      CommunicationView(onRefresh: () => setState(() {})),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -37,7 +45,10 @@ class _TeacherCMSPageState extends State<TeacherCMSPage> {
         title: const Text(
           "Science CMS & Teacher Hub",
           style: TextStyle(
-              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         backgroundColor: primaryDark,
         elevation: 0,
@@ -53,12 +64,27 @@ class _TeacherCMSPageState extends State<TeacherCMSPage> {
         padding: const EdgeInsets.all(16),
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
-      
-      
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: 'Content',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.analytics),
+            label: 'Progress',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.message), label: 'Messages'),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: accentColor,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: primaryDark,
+        onTap: _onItemTapped,
+      ),
     );
   }
 }
-
 
 // --- CONTENT MANAGEMENT VIEW (Tab 0) ---
 class ContentManagementView extends StatelessWidget {
@@ -81,7 +107,11 @@ class ContentManagementView extends StatelessWidget {
               children: [
                 const Text(
                   'Content Overview',
-                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 // Button is now compact for mobile
                 ElevatedButton.icon(
@@ -93,9 +123,17 @@ class ContentManagementView extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: accentColor,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
               ],
@@ -145,7 +183,11 @@ class ContentManagementView extends StatelessWidget {
           // Detailed Content List
           Text(
             'Recent Activity & Lesson Status',
-            style: TextStyle(color: Colors.grey[300], fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.grey[300],
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 15),
           _buildContentStatusList(cardColor, accentColor),
@@ -157,10 +199,30 @@ class ContentManagementView extends StatelessWidget {
   // Refactored table to a mobile-friendly list view
   Widget _buildContentStatusList(Color cardColor, Color accentColor) {
     final List<Map<String, String>> data = [
-      {'title': 'The Water Cycle', 'grade': 'Grade 5', 'status': 'Live', 'date': 'Oct 25'},
-      {'title': 'Simple Machines Quiz', 'grade': 'Grade 4', 'status': 'Draft', 'date': 'Nov 18'},
-      {'title': 'Planetary Systems', 'grade': 'Grade 6', 'status': 'Pending Review', 'date': 'Nov 19'},
-      {'title': 'Video: Cell Biology', 'grade': 'Grade 6', 'status': 'Live', 'date': 'Sep 01'},
+      {
+        'title': 'The Water Cycle',
+        'grade': 'Grade 5',
+        'status': 'Live',
+        'date': 'Oct 25',
+      },
+      {
+        'title': 'Simple Machines Quiz',
+        'grade': 'Grade 4',
+        'status': 'Draft',
+        'date': 'Nov 18',
+      },
+      {
+        'title': 'Planetary Systems',
+        'grade': 'Grade 6',
+        'status': 'Pending Review',
+        'date': 'Nov 19',
+      },
+      {
+        'title': 'Video: Cell Biology',
+        'grade': 'Grade 6',
+        'status': 'Live',
+        'date': 'Sep 01',
+      },
     ];
 
     return Card(
@@ -174,9 +236,21 @@ class ContentManagementView extends StatelessWidget {
         itemBuilder: (context, index) {
           final item = data[index];
           return ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            title: Text(item['title']!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-            subtitle: Text(item['grade']! + ' | Last Edit: ' + item['date']!, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            title: Text(
+              item['title']!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            subtitle: Text(
+              item['grade']! + ' | Last Edit: ' + item['date']!,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -210,7 +284,11 @@ class ProgressTrackingView extends StatelessWidget {
         children: [
           const Text(
             'Student Progress Analytics',
-            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 20),
           // Key Analytics Cards (Changed from 3-column to 2-column grid for mobile)
@@ -251,7 +329,11 @@ class ProgressTrackingView extends StatelessWidget {
           // Student Roster with Metrics
           Text(
             'Roster & Individual Performance',
-            style: TextStyle(color: Colors.grey[300], fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.grey[300],
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 15),
           _buildRosterList(cardColor, accentColor, warningColor),
@@ -261,7 +343,11 @@ class ProgressTrackingView extends StatelessWidget {
   }
 
   // Refactored table to a mobile-friendly list view
-  Widget _buildRosterList(Color cardColor, Color accentColor, Color warningColor) {
+  Widget _buildRosterList(
+    Color cardColor,
+    Color accentColor,
+    Color warningColor,
+  ) {
     final List<Map<String, dynamic>> students = [
       {'name': 'Alice Johnson', 'avg': 92, 'alerts': 0},
       {'name': 'Ben Carter', 'avg': 68, 'alerts': 2},
@@ -281,16 +367,39 @@ class ProgressTrackingView extends StatelessWidget {
           final student = students[index];
           final scoreColor = student['avg'] > 75 ? accentColor : warningColor;
           return ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 4,
+            ),
             leading: CircleAvatar(
               backgroundColor: scoreColor.withOpacity(0.2),
-              child: Text(student['name'][0], style: TextStyle(color: scoreColor, fontWeight: FontWeight.bold)),
+              child: Text(
+                student['name'][0],
+                style: TextStyle(
+                  color: scoreColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-            title: Text(student['name'], style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-            subtitle: Text('Avg. Score: ${student['avg']}%', style: TextStyle(color: scoreColor, fontWeight: FontWeight.bold)),
-            trailing: student['alerts'] > 0
-                ? Icon(Icons.error, color: warningColor, size: 20)
-                : const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+            title: Text(
+              student['name'],
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            subtitle: Text(
+              'Avg. Score: ${student['avg']}%',
+              style: TextStyle(color: scoreColor, fontWeight: FontWeight.bold),
+            ),
+            trailing:
+                student['alerts'] > 0
+                    ? Icon(Icons.error, color: warningColor, size: 20)
+                    : const Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
             onTap: () {
               // Action to view student details
             },
@@ -301,142 +410,340 @@ class ProgressTrackingView extends StatelessWidget {
   }
 }
 
-// --- COMMUNICATION VIEW (Tab 2) ---
-class CommunicationView extends StatelessWidget {
-  const CommunicationView({super.key});
+// --- COMMUNICATION VIEW (Tab 2) - WITH REAL MESSAGES ---
+class CommunicationView extends StatefulWidget {
+  final VoidCallback onRefresh;
 
+  const CommunicationView({super.key, required this.onRefresh});
+
+  @override
+  State<CommunicationView> createState() => _CommunicationViewState();
+}
+
+class _CommunicationViewState extends State<CommunicationView> {
   final Color cardColor = const Color(0xFF1E2140);
   final Color accentColor = const Color(0xFF4CAF50);
 
+  List<Map<String, dynamic>> _messages = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMessages();
+  }
+
+  Future<void> _loadMessages() async {
+    setState(() => _isLoading = true);
+
+    final prefs = await SharedPreferences.getInstance();
+    String? messagesJson = prefs.getString('admin_messages');
+
+    if (messagesJson != null) {
+      List<dynamic> allMessages = jsonDecode(messagesJson);
+      // Filter messages where recipient is "Teacher"
+      _messages =
+          allMessages
+              .map((e) => Map<String, dynamic>.from(e))
+              .where((msg) => msg['to'] == 'Teacher')
+              .toList();
+    }
+
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> _markAsRead(Map<String, dynamic> message) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? messagesJson = prefs.getString('admin_messages');
+
+    if (messagesJson != null) {
+      List<dynamic> allMessages = jsonDecode(messagesJson);
+
+      // Find and update the message
+      for (var msg in allMessages) {
+        if (msg['id'] == message['id']) {
+          msg['isRead'] = true;
+          break;
+        }
+      }
+
+      // Save back
+      await prefs.setString('admin_messages', jsonEncode(allMessages));
+
+      // Update local state
+      setState(() {
+        message['isRead'] = true;
+      });
+    }
+  }
+
+  void _viewMessageDetails(Map<String, dynamic> message) {
+    _markAsRead(message);
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: cardColor,
+            title: Row(
+              children: [
+                const Icon(Icons.message, color: Color(0xFF4CAF50)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    message['subject'] ?? 'No Subject',
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildDetailRow(Icons.person, 'From', message['from']),
+                  const SizedBox(height: 12),
+                  _buildDetailRow(
+                    Icons.access_time,
+                    'Sent',
+                    _formatTimestamp(message['timestamp']),
+                  ),
+                  const Divider(color: Colors.white24, height: 24),
+                  const Text(
+                    'Message:',
+                    style: TextStyle(
+                      color: Color(0xFF4CAF50),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    message['message'] ?? '',
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Close',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, color: const Color(0xFF4CAF50), size: 18),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: const TextStyle(color: Colors.white70, fontSize: 13),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(color: Colors.white, fontSize: 13),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatTimestamp(String timestamp) {
+    try {
+      final date = DateTime.parse(timestamp);
+      final now = DateTime.now();
+      final difference = now.difference(date);
+
+      if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}m ago';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours}h ago';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays}d ago';
+      } else {
+        return '${date.day}/${date.month}/${date.year}';
+      }
+    } catch (e) {
+      return 'Unknown';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final unreadCount = _messages.where((m) => !(m['isRead'] ?? false)).length;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.only(bottom: 16), // Padding adjustment for bottom nav
+      padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Announcements & Q&A',
-            style: TextStyle(
-                color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-
-          // Q&A / Discussion Moderation Card
-          Card(
-            color: cardColor,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Pending Q&A Messages',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold)),
-                  const Divider(color: Color(0xFF2E3150), height: 30),
-                  _QaItem(
-                    cardColor: cardColor,
-                    topic: 'Magnetism Unit',
-                    question: 'Why doesn\'t every metal stick to a magnet?',
-                    student: 'Liam M. (G5)',
-                  ),
-                  _QaItem(
-                    cardColor: cardColor,
-                    topic: 'Ecosystems Lesson',
-                    question: 'Can we use outside videos for the project?',
-                    student: 'Sophia K. (G4)',
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.arrow_forward, size: 18),
-                      label: const Text('View All Q&A'),
-                      style:
-                          TextButton.styleFrom(foregroundColor: accentColor),
-                    ),
-                  ),
-                ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Student Messages',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Send Announcement Card
-          Card(
-            color: cardColor,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
                 children: [
-                  const Text('Send New Announcement',
-                      style: TextStyle(
+                  if (unreadCount > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$unreadCount new',
+                        style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 15),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Title',
-                      labelStyle: TextStyle(color: Colors.grey[400]),
-                      fillColor: const Color(0xFF2E3150),
-                      filled: true,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none),
-                    ),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(height: 10),
-                  TextFormField(
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      labelText: 'Message Content',
-                      labelStyle: TextStyle(color: Colors.grey[400]),
-                      fillColor: const Color(0xFF2E3150),
-                      filled: true,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none),
-                    ),
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  const SizedBox(height: 15),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.send, color: Colors.white, size: 18),
-                      label: const Text('Send'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: accentColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    onPressed: _loadMessages,
+                    tooltip: 'Refresh Messages',
                   ),
                 ],
               ),
-            ),
+            ],
           ),
+          const SizedBox(height: 20),
+
+          // Messages List
+          if (_isLoading)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(32.0),
+                child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
+              ),
+            )
+          else if (_messages.isEmpty)
+            Card(
+              color: cardColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 4,
+              child: const Padding(
+                padding: EdgeInsets.all(40.0),
+                child: Center(
+                  child: Column(
+                    children: [
+                      Icon(Icons.inbox, size: 60, color: Colors.white24),
+                      SizedBox(height: 16),
+                      Text(
+                        'No messages yet',
+                        style: TextStyle(color: Colors.white54, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          else
+            Card(
+              color: cardColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 4,
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  final isRead = message['isRead'] ?? false;
+
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    leading: Stack(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: isRead ? Colors.grey : accentColor,
+                          child: const Icon(Icons.person, color: Colors.white),
+                        ),
+                        if (!isRead)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              width: 12,
+                              height: 12,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    title: Text(
+                      message['subject'] ?? 'No Subject',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight:
+                            isRead ? FontWeight.normal : FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'From: @${message['from']}',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          _formatTimestamp(message['timestamp']),
+                          style: const TextStyle(
+                            color: Colors.white54,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: Colors.white54,
+                    ),
+                    onTap: () => _viewMessageDetails(message),
+                  );
+                },
+              ),
+            ),
         ],
       ),
     );
   }
 }
-
 
 // --- REUSABLE HELPER WIDGETS ---
 
@@ -483,7 +790,11 @@ class _MetricCard extends StatelessWidget {
             ),
             Text(
               value,
-              style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold), // Reduced font size
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ), // Reduced font size
             ),
           ],
         ),
@@ -522,63 +833,11 @@ class _StatusPill extends StatelessWidget {
       ),
       child: Text(
         status,
-        style: TextStyle(color: _getColor(), fontSize: 11, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-class _QaItem extends StatelessWidget {
-  final Color cardColor;
-  final String topic;
-  final String question;
-  final String student;
-
-  const _QaItem({
-    required this.cardColor,
-    required this.topic,
-    required this.question,
-    required this.student,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cardColor.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFF2E3150)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Topic: $topic | $student',
-            style: const TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.bold, fontSize: 13),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            question,
-            style: const TextStyle(color: Colors.white),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50).withOpacity(0.8),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-              ),
-              child: const Text('Reply', style: TextStyle(color: Colors.white, fontSize: 12)),
-            ),
-          ),
-        ],
+        style: TextStyle(
+          color: _getColor(),
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

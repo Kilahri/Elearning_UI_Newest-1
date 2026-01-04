@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:elearningapp_flutter/screens/role_navigation.dart';
+import 'dart:convert';
 
 // Theme Colors
 const Color kPrimaryColor = Color(0xFF6A1B9A);
@@ -19,7 +20,8 @@ class StudentSignupScreen extends StatefulWidget {
 class _StudentSignupScreenState extends State<StudentSignupScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _studentIdController = TextEditingController();
-  final TextEditingController _parentContactController = TextEditingController();
+  final TextEditingController _parentContactController =
+      TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -29,7 +31,7 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
   String? selectedSection;
   final List<String> sections = ["Section A", "Section B", "Section C"];
 
-  final String selectedRole = "student"; // Only students on this screen
+  final String selectedRole = "student";
 
   Future<void> _signup() async {
     if (_nameController.text.isEmpty ||
@@ -48,6 +50,25 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
 
     final prefs = await SharedPreferences.getInstance();
 
+    // Check if username already exists in students list
+    String? studentsJson = prefs.getString('students_list');
+    if (studentsJson != null) {
+      List<dynamic> students = jsonDecode(studentsJson);
+      bool usernameExists = students.any(
+        (student) => student['username'] == _usernameController.text.trim(),
+      );
+      if (usernameExists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Username already exists. Please choose another."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
+    // Save individual student data (for backward compatibility)
     await prefs.setString("name", _nameController.text.trim());
     await prefs.setString("username", _usernameController.text.trim());
     await prefs.setString("password", _passwordController.text.trim());
@@ -59,15 +80,46 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
       await prefs.setString("studentId", _studentIdController.text.trim());
     }
     if (_parentContactController.text.isNotEmpty) {
-      await prefs.setString("parentContact", _parentContactController.text.trim());
+      await prefs.setString(
+        "parentContact",
+        _parentContactController.text.trim(),
+      );
     }
+
+    // Add to students list for admin panel
+    List<Map<String, dynamic>> studentsList = [];
+    if (studentsJson != null) {
+      List<dynamic> decoded = jsonDecode(studentsJson);
+      studentsList = decoded.map((e) => Map<String, dynamic>.from(e)).toList();
+    }
+
+    studentsList.add({
+      'username': _usernameController.text.trim(),
+      'password': _passwordController.text.trim(),
+      'displayName': _nameController.text.trim(),
+      'email': '', // Can add email field if needed
+      'grade': selectedGrade!,
+      'section': selectedSection!,
+      'studentId': _studentIdController.text.trim(),
+      'parentContact': _parentContactController.text.trim(),
+      'role': 'student',
+      'isActive': true,
+      'createdAt': DateTime.now().toIso8601String(),
+      'source': 'signup',
+    });
+
+    await prefs.setString('students_list', jsonEncode(studentsList));
 
     if (!mounted) return;
 
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => RoleNavigation(role: selectedRole),
+        builder:
+            (context) => RoleNavigation(
+              role: selectedRole,
+              username: _usernameController.text.trim(),
+            ),
       ),
     );
   }
@@ -93,9 +145,7 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
         prefixIcon: Icon(icon, color: kAccentColor),
         filled: true,
         fillColor: kPrimaryColor.withOpacity(0.1),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
       ),
     );
   }
@@ -111,20 +161,14 @@ class _StudentSignupScreenState extends State<StudentSignupScreen> {
     return DropdownButtonFormField<String>(
       value: value,
       onChanged: onChanged,
-      items: items
-          .map((e) => DropdownMenuItem(
-                value: e,
-                child: Text(e),
-              ))
-          .toList(),
+      items:
+          items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: kAccentColor),
         filled: true,
         fillColor: kPrimaryColor.withOpacity(0.1),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
       ),
     );
   }
